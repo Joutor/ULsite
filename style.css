@@ -1,9 +1,7 @@
-
-
 body {
-  font-family: "Inter", sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 h1 {
@@ -19,6 +17,7 @@ p {
     font-size: 120%;
     line-height: 150%;
 }
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -35,12 +34,12 @@ a {
 }
 
 
-ul{
+ul {
     font-size: 120%;
     line-height: 150%;
     margin: 0;
     color: black;
-    }
+}
 
 
 .header_list {
@@ -50,13 +49,9 @@ ul{
     margin: 0;
     padding: 0;
     align-items: center;
-    decoratio
 }
 
-.header
-
 .header {
-
 }
 
 .header .container {
@@ -67,24 +62,20 @@ ul{
 
 .header_logo {
     height: 36px;
-
 }
 
 .header_nav {
-
 }
 
 .btn {
     display: flex;
     align-items: center;
     justify-content: center;
-
     padding: 10px 20px;
-
     border-style: solid;
     border-radius: 10px;
     border-color: #5C35F9;
-    
+
 }
 
 .btn:hover {
@@ -102,17 +93,12 @@ ul{
 .main_btn {
     background-color: #5C35F9;
     color: white;
-
     border-radius: 10px;
     border-color: #5C35F9;
-
     font-size: 120%;
-
-
     padding: 15px 40px;
     box-shadow: none;
-
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .main_btn:hover {
@@ -127,6 +113,7 @@ ul{
     align-items: center;
     margin: 100px auto;
 }
+
 .card {
     background-color: white;
     width: 320px;
@@ -137,7 +124,7 @@ ul{
     transition: 1s;
 }
 
-.card:hover{
+.card:hover {
     width: 320px;
     min-height: 320px;
     padding: 20px;
@@ -146,13 +133,11 @@ ul{
 }
 
 .cards {
-
-
 }
 
 .cards .container {
     background-image: url(./img/AAA.png);
-    background-size:contain;
+    background-size: contain;
     background-repeat: no-repeat;
     margin: 100px auto;
     display: flex;
@@ -171,7 +156,6 @@ ul{
 }
 
 .feature {
-
     display: flex;
     flex-direction: column;
     width: 50%;
@@ -186,7 +170,6 @@ ul{
 
 .feature_img {
     width: 48%;
-
 }
 
 .buy .container {
@@ -220,10 +203,7 @@ ul{
 }
 
 .image_buy {
-
-
 }
-
 
 .fut {
     padding: 50px;
@@ -248,18 +228,17 @@ ul{
     .feature_img {
         width: 100%;
     }
+
     .feature {
-        width: 100%; 
+        width: 100%;
     }
 }
 
 @media (max-width: 600px) {
-
-    
     .cards .container {
         background-image: url(./img/AAA2.png);
-        background-size:cover;
-        background-repeat: no-repeat;   
+        background-size: cover;
+        background-repeat: no-repeat;
     }
 
     .container {
@@ -274,6 +253,7 @@ ul{
         align-items: center;
         gap: 40px;
     }
+
     .header_list {
         display: flex;
         flex-direction: column;
@@ -284,13 +264,13 @@ ul{
         font-size: 150%;
         margin-bottom: -1px;
     }
+
     h2 {
         font-size: 120%;
     }
-    
+
     p {
         font-size: 110%;
         line-height: 150%;
     }
-
 }
