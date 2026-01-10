@@ -111,7 +111,6 @@ ul {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    margin: 100px auto;
 }
 
 .card {
@@ -133,13 +132,13 @@ ul {
 }
 
 .cards {
+    background-image: url(./img/AAA.png);
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 100% auto;
 }
 
 .cards .container {
-    background-image: url(./img/AAA.png);
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin: 100px auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -173,7 +172,13 @@ ul {
 }
 
 .buy .container {
-    padding-top: 200px;
+    gap: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.economy .container {
     gap: 40px;
     display: flex;
     flex-wrap: wrap;
@@ -235,10 +240,11 @@ ul {
 }
 
 @media (max-width: 600px) {
-    .cards .container {
+    .cards {
         background-image: url(./img/AAA2.png);
         background-size: cover;
         background-repeat: no-repeat;
+        background-position: center;
     }
 
     .container {
