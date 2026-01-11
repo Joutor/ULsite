@@ -144,7 +144,7 @@ ul {
     pointer-events: none;
     z-index: 0;
 
-    background: url("./img/bg_try.svg") no-repeat center 12%;
+    background: url("./img/bg_try.min.svg") no-repeat center 12%;
     background-size: 100% auto;
 }
 
