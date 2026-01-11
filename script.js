@@ -3,6 +3,65 @@ let tasksPerMonthCounter = 100
 const pricePerMonth = 1000
 const pricePerYear = 10000
 
+
+// --- Economy editable params ---
+const ECONOMY_STORAGE_KEY = "uldesk_economy_params_v1"
+
+const economyDefaults = {
+	cleanMin: 12,     // “чистое” время решения (мин)
+	costPerHour: 800, // ₽/час
+	chaosMin: 3.0,    // потери на бардак (мин/обращение) = переключения+поиск контекста+ручной SLA
+	dupPct: 8,        // дубли/повторные (%)
+	lostPct: 2,       // потерянные/пропущенные (%)
+	errPct: 4,        // ошибки/переоткрытия (%)
+}
+
+function clampNum(v, min, max) {
+	if (!Number.isFinite(v)) return min
+	return Math.max(min, Math.min(max, v))
+}
+
+function loadEconomyParams() {
+	try {
+		const raw = localStorage.getItem(ECONOMY_STORAGE_KEY)
+		if (!raw) return {...economyDefaults}
+		const parsed = JSON.parse(raw)
+
+		return {
+			cleanMin: clampNum(Number(parsed.cleanMin), 1, 240),
+			costPerHour: clampNum(Number(parsed.costPerHour), 100, 20000),
+			chaosMin: clampNum(Number(parsed.chaosMin), 0, 240),
+			dupPct: clampNum(Number(parsed.dupPct), 0, 100),
+			lostPct: clampNum(Number(parsed.lostPct), 0, 100),
+			errPct: clampNum(Number(parsed.errPct), 0, 100),
+		}
+	} catch (e) {
+		return {...economyDefaults}
+	}
+}
+
+function saveEconomyParams(p) {
+	try {
+		localStorage.setItem(ECONOMY_STORAGE_KEY, JSON.stringify(p))
+	} catch (e) {
+		// ignore
+	}
+}
+
+let economyParams = loadEconomyParams()
+
+function getEconomyOpts() {
+	return {
+		T: economyParams.cleanMin,
+		C: economyParams.costPerHour,
+		chaos: economyParams.chaosMin,
+		d: economyParams.dupPct / 100,
+		l: economyParams.lostPct / 100,
+		e: economyParams.errPct / 100,
+	}
+}
+
+
 function employeeCounterPlus() {
 	employeeCounter += 1
 	updateEmployeeCounters()
@@ -27,12 +86,12 @@ function helpdeskTimeSavingsMinus() {
 	if (tasksPerMonthCounter <= 0) {
 		tasksPerMonthCounter = 100
 	}
-	calcHelpdeskTimeSavings()
+	calcHelpdeskTimeSavings(getEconomyOpts())
 }
 
 function helpdeskTimeSavingsPlus() {
 	tasksPerMonthCounter += 100
-	calcHelpdeskTimeSavings()
+	calcHelpdeskTimeSavings(getEconomyOpts())
 }
 
 /**
@@ -56,33 +115,24 @@ function calcHelpdeskTimeSavings(opts = {}) {
 	const defaults = {
 		// (2) среднее “чистое” время решения заявки (мин)
 		T: 12,
-
-		// потери “ручной омниканальности” (мин/заявка)
-		tSwitch: 1.0, // переключения между каналами/людьми
-		tFind: 1.5,   // поиск истории/контекста
-		tSla: 0.5,    // ручной контроль сроков/эскалаций/SLA
-
+		// потери “ручной омниканальности/бардака” (мин/заявка)
+		chaos: 3.0,
 		// (3) дубли/повторные обращения
 		d: 0.08,      // 8% дублей
 		tDup: 10,     // лишние минуты на дубль
-
 		// (4) потерянные/пропущенные обращения
 		l: 0.02,      // 2% теряются
 		tLost: 30,    // среднее время на восстановление/разбор
-
 		// (5) ошибки/переоткрытия из-за контекста/учёта
 		e: 0.04,      // 4% ошибок/переоткрытий
 		tErr: 15,     // время на исправление
-
-		// (6) стоимость часа (не используется для времени/FTE, но оставлено для расширения)
+		// (6) стоимость часа
 		C: 800,       // ₽/час
-
 		// --- Эффект внедрения системы (типовые средние) ---
-		selfService: 0.10,          // доля обращений, не создающихся из-за базы знаний (10%)
-		baseResolutionReduction: 0.10, // ускорение “чистого” решения за счёт шаблонов/макросов (10%)
-
-		overheadReduction: 0.60,    // снижение tSwitch+tFind+tSla (60%)
-		defectReduction: 0.50       // снижение дублей/потерь/ошибок (50%)
+		selfService: 0.10,             // доля обращений, не создающихся из-за базы знаний (10%)
+		baseResolutionReduction: 0.10, // ускорение “чистого” решения (10%)
+		overheadReduction: 0.60,       // снижение chaos (60%)
+		defectReduction: 0.50          // снижение дублей/потерь/ошибок (50%)
 	}
 	const p = {...defaults, ...opts}
 	// Валидация долей 0..1
@@ -90,15 +140,11 @@ function calcHelpdeskTimeSavings(opts = {}) {
 		if (!Number.isFinite(p[k]) || p[k] < 0 || p[k] > 1) throw new Error(`${k} должно быть числом в диапазоне 0..1`)
 	}
 	// --- 1) Нагрузка без системы (ручная омниканальность) ---
-	const manualMinutes =
-		N * (p.T + p.tSwitch + p.tFind + p.tSla) +
-		N * p.d * p.tDup +
-		N * p.l * p.tLost +
-		N * p.e * p.tErr
+	const manualMinutes = N * (p.T + p.chaos) + N * p.d * p.tDup + N * p.l * p.tLost + N * p.e * p.tErr
 	// --- 2) Нагрузка с системой ---
 	// часть обращений “съедает” база знаний (самообслуживание)
 	const N_eff = N * (1 - p.selfService)
-	const overheadPerTicket = (p.tSwitch + p.tFind + p.tSla) * (1 - p.overheadReduction)
+	const overheadPerTicket = p.chaos * (1 - p.overheadReduction)
 	const baseT = p.T * (1 - p.baseResolutionReduction)
 	const d_eff = p.d * (1 - p.defectReduction)
 	const l_eff = p.l * (1 - p.defectReduction)
@@ -124,7 +170,7 @@ function calcHelpdeskTimeSavings(opts = {}) {
 		savedRub,
 		assumptions: {
 			T_min: p.T,
-			overhead_min_per_ticket: {tSwitch: p.tSwitch, tFind: p.tFind, tSla: p.tSla},
+			overhead_min_per_ticket: p.chaos,
 			rates: {d: p.d, l: p.l, e: p.e},
 			times_min: {tDup: p.tDup, tLost: p.tLost, tErr: p.tErr},
 			effects: {
@@ -352,4 +398,75 @@ document.addEventListener("DOMContentLoaded", () => {
 		clearTimeout(finalTimer)
 		finalTimer = setTimeout(() => redraw(false), 260)
 	})
+})
+
+function initEconomySettingsUI() {
+	const toggle = document.getElementById("economy-settings-toggle")
+	const panel = document.getElementById("economy-settings-panel")
+	if (!toggle || !panel) return
+
+	const elClean = document.getElementById("eco_clean_min")
+	const elCost = document.getElementById("eco_cost_per_hour") // ✅ ДОБАВИТЬ
+	const elChaos = document.getElementById("eco_chaos_min")
+	const elDup = document.getElementById("eco_dup_pct")
+	const elLost = document.getElementById("eco_lost_pct")
+	const elErr = document.getElementById("eco_err_pct")
+	const btnReset = document.getElementById("eco_reset")
+
+	// если какой-то инпут не найден — выходим (чтобы не ловить ошибки)
+	if (!elClean || !elCost || !elChaos || !elDup || !elLost || !elErr) return
+
+	function syncToInputs() {
+		elClean.value = String(economyParams.cleanMin)
+		elCost.value = String(economyParams.costPerHour) // ✅ ДОБАВИТЬ
+		elChaos.value = String(economyParams.chaosMin)
+		elDup.value = String(economyParams.dupPct)
+		elLost.value = String(economyParams.lostPct)
+		elErr.value = String(economyParams.errPct)
+	}
+
+	let t = 0
+
+	function recalcDebounced() {
+		clearTimeout(t)
+		t = setTimeout(() => calcHelpdeskTimeSavings(getEconomyOpts()), 120)
+	}
+
+	function readFromInputs() {
+		economyParams = {
+			cleanMin: clampNum(Number(elClean.value), 1, 240),
+			costPerHour: clampNum(Number(elCost.value), 100, 20000), // ✅ ДОБАВИТЬ
+			chaosMin: clampNum(Number(elChaos.value), 0, 240),
+			dupPct: clampNum(Number(elDup.value), 0, 100),
+			lostPct: clampNum(Number(elLost.value), 0, 100),
+			errPct: clampNum(Number(elErr.value), 0, 100),
+		}
+		saveEconomyParams(economyParams)
+		recalcDebounced()
+	}
+
+	toggle.addEventListener("click", () => {
+		const isOpen = !panel.hidden
+		panel.hidden = isOpen
+		toggle.setAttribute("aria-expanded", String(!isOpen))
+		toggle.dataset.open = String(!isOpen)
+	});
+	[elClean, elCost, elChaos, elDup, elLost, elErr].forEach((el) => { // ✅ elCost теперь существует
+		el.addEventListener("input", readFromInputs)
+		el.addEventListener("change", readFromInputs)
+	})
+	if (btnReset) {
+		btnReset.addEventListener("click", () => {
+			economyParams = {...economyDefaults}
+			saveEconomyParams(economyParams)
+			syncToInputs()
+			calcHelpdeskTimeSavings(getEconomyOpts())
+		})
+	}
+	syncToInputs()
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	initEconomySettingsUI()
+	calcHelpdeskTimeSavings(getEconomyOpts()) // чтобы цифры сразу соответствовали параметрам
 })

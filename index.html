@@ -236,6 +236,51 @@
 		</div>
 	</section>
 
+	<div class="economy-settings">
+		<button
+			id="economy-settings-toggle"
+			class="economy-settings__toggle"
+			type="button"
+			aria-expanded="false"
+			aria-controls="economy-settings-panel"
+		>
+			Параметры расчёта <span class="economy-settings__chev" aria-hidden="true">▾</span>
+		</button>
+
+		<div id="economy-settings-panel" class="economy-settings__panel" hidden>
+			<div class="economy-settings__grid">
+				<label class="economy-settings__field">
+					<span>“Чистое” время решения одной заявки (мин)</span>
+					<input id="eco_clean_min" type="number" min="1" max="240" step="1">
+				</label>
+				<label class="economy-settings__field">
+					<span>Стоимость часа сотрудника (₽/час)</span>
+					<input id="eco_cost_per_hour" type="number" min="100" max="20000" step="50">
+				</label>
+				<label class="economy-settings__field">
+					<span>Потери на бардак (мин на обращение)</span>
+					<input id="eco_chaos_min" type="number" min="0" max="240" step="0.5">
+				</label>
+				<label class="economy-settings__field">
+					<span>Доля дублей/повторных обращений (%)</span>
+					<input id="eco_dup_pct" type="number" min="0" max="100" step="0.1">
+				</label>
+				<label class="economy-settings__field">
+					<span>Доля потерянных/пропущенных (%)</span>
+					<input id="eco_lost_pct" type="number" min="0" max="100" step="0.1">
+				</label>
+				<label class="economy-settings__field">
+					<span>Доля ошибок/переоткрытий (%)</span>
+					<input id="eco_err_pct" type="number" min="0" max="100" step="0.1">
+				</label>
+			</div>
+
+			<div class="economy-settings__actions">
+				<button id="eco_reset" type="button" class="economy-settings__reset">Сбросить</button>
+			</div>
+		</div>
+	</div>
+
 	<section class="buy">
 		<div class="container">
 			<div class="image_buy">
