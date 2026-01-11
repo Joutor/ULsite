@@ -134,39 +134,25 @@ ul {
 .cards {
     position: relative;
     overflow: hidden;
-    background: none;
+    min-height: 600px;
 }
 
-.cards::before {
-    content: "";
+.cards-bg {
     position: absolute;
     inset: 0;
-    pointer-events: none;
+    width: 100%;
+    height: 100%;
     z-index: 0;
-
-    background: url("./img/bg_try.min.svg") no-repeat center 12%;
-    background-size: 100% auto;
-}
-
-.cards::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 64px;
     pointer-events: none;
-    z-index: 1;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
 }
 
 .cards .container {
     position: relative;
-    z-index: 2;
+    z-index: 1;
 }
 
 .card_wrapper {
-    padding-top: 100px;
+    padding-top: 30px;
     gap: 40px;
     display: flex;
     flex-wrap: wrap;
