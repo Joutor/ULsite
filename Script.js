@@ -151,8 +151,6 @@ function calcHelpdeskTimeSavings(opts = {}) {
 	document.getElementById("economy-hours").innerHTML = `≈ ${formatThousandsSpaces(savedHours.toFixed(0))} ч`
 	document.getElementById("economy-fte").innerHTML = `≈ ${savedFTE.toFixed(2)} FTE`
 	document.getElementById("economy-money").innerHTML = `≈ ${formatThousandsSpaces(savedRub.toFixed(0))} ₽`
-
-	console.log(res)
 }
 
 function formatThousandsSpaces(value) {
