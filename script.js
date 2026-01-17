@@ -222,6 +222,7 @@ function formatEmployees(count) {
 }
 
 function drawRibbonBackground(section, opts = {}) {
+	const textOffset = Number.isFinite(opts.textOffset) ? opts.textOffset : 0
 	const canvas = section.querySelector(".cards-bg")
 	if (!canvas) return
 	const ctx = canvas.getContext("2d")
@@ -257,7 +258,8 @@ function drawRibbonBackground(section, opts = {}) {
 	ctx.font = font
 	ctx.textBaseline = "middle"
 
-	for (const r of ribbons) {
+	for (let idx = 0; idx < ribbons.length; idx++) {
+		const r = ribbons[idx]
 		const angle = (r.angleDeg * Math.PI) / 180
 		const slope = Math.tan(angle)
 		const yAtX0 = r.y + slope * (x0 - w * 0.5)
@@ -280,11 +282,13 @@ function drawRibbonBackground(section, opts = {}) {
 		ctx.stroke()
 		ctx.restore()
 		// текст рисуем только в финальном режиме
-		if (!isDraft) {
+		if (opts.textAlways || !isDraft) {
 			const lineAngle = Math.atan2(yAtX1 - yAtX0, x1 - x0)
 			ctx.fillStyle = "rgba(255,255,255,0.92)"
-
-			for (let x = x0; x < x1; x += r.step) {
+			const step = Math.max(1, Number(r.step) || 260)
+			const dir = Number.isFinite(r.dir) ? r.dir : (idx % 2 === 0 ? 1 : -1) // чередуем направление
+			const shift = ((textOffset * dir) % step + step) % step
+			for (let x = x0 - shift; x < x1; x += step) {
 				const y = r.y + slope * (x - w * 0.5)
 				ctx.save()
 				ctx.translate(x, y)
@@ -365,38 +369,50 @@ function makeRibbonsForSize(seed, w, h) {
 document.addEventListener("DOMContentLoaded", () => {
 	const section = document.querySelector(".cards")
 	if (!section) return
+	// --- Анимация движения надписей по лентам ---
+	const TEXT = "пробный период 1 месяц"
+	const SPEED_PX_PER_SEC = 46 // скорость прокрутки текста
+	let w = 0
+	let h = 0
+	let ribbons = []
+	let draft = false
+	let finalTimer = 0
 
-	function redraw(draft) {
-		const rect = section.getBoundingClientRect()
-		const ribbons = makeRibbonsForSize(123456, rect.width, rect.height)
+	function rebuild() {
+		w = Math.max(1, section.clientWidth)
+		h = Math.max(1, section.clientHeight)
+		ribbons = makeRibbonsForSize(123456, w, h)
+	}
 
+	rebuild()
+	const t0 = performance.now()
+
+	function frame(now) {
+		const t = (now - t0) / 1000
 		drawRibbonBackground(section, {
 			ribbons,
-			text: "пробный период 1 месяц",
+			width: w,
+			height: h,
+			text: TEXT,
 			ribbonColor: "#6B4CFF",
 			fadeH: 220,
 			fadeTo: "#fff",
-			draft
+			draft,
+			textAlways: true,
+			textOffset: t * SPEED_PX_PER_SEC,
 		})
+		requestAnimationFrame(frame)
 	}
 
-	redraw(false)
-
-	let rafId = 0
-	let finalTimer = 0
-
+	requestAnimationFrame(frame)
 	window.addEventListener("resize", () => {
-		// быстрый кадр во время ресайза
-		if (!rafId) {
-			rafId = requestAnimationFrame(() => {
-				rafId = 0
-				redraw(true)
-			})
-		}
-
-		// финальная “красивая” перерисовка после паузы
+		draft = true
+		rebuild()
 		clearTimeout(finalTimer)
-		finalTimer = setTimeout(() => redraw(false), 260)
+		finalTimer = setTimeout(() => {
+			draft = false
+			rebuild()
+		}, 260)
 	})
 })
 
