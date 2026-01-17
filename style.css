@@ -111,6 +111,9 @@ ul {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    width: 75%;
+    margin-bottom: 48px;
+    margin-top: -16px;
 }
 
 .card {
