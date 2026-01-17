@@ -221,91 +221,6 @@ function formatEmployees(count) {
 	return `${count} ${word}`
 }
 
-function drawRibbonBackground(section, opts = {}) {
-	const textOffset = Number.isFinite(opts.textOffset) ? opts.textOffset : 0
-	const canvas = section.querySelector(".cards-bg")
-	if (!canvas) return
-	const ctx = canvas.getContext("2d")
-
-	const isDraft = !!opts.draft
-	const dpr = isDraft ? 1 : Math.min(window.devicePixelRatio || 1, 2)
-
-	const rect = section.getBoundingClientRect()
-	const w = Math.max(1, Math.floor(rect.width))
-	const h = Math.max(1, Math.floor(rect.height))
-
-	canvas.width = Math.floor(w * dpr)
-	canvas.height = Math.floor(h * dpr)
-	canvas.style.width = w + "px"
-	canvas.style.height = h + "px"
-
-	ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-	ctx.clearRect(0, 0, w, h)
-
-	const ribbons = opts.ribbons ?? []
-	if (ribbons.length === 0) return
-
-	const text = opts.text ?? "пробный период 1 месяц"
-	const font = opts.font ?? '600 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial'
-	const ribbonColor = opts.ribbonColor ?? "#6B4CFF"
-	const fadeH = opts.fadeH ?? 200
-	const fadeTo = opts.fadeTo ?? "#fff"
-
-	const L = Math.hypot(w, h) * 2.0
-	const x0 = -L * 0.2
-	const x1 = w + L * 0.2
-
-	ctx.font = font
-	ctx.textBaseline = "middle"
-
-	for (let idx = 0; idx < ribbons.length; idx++) {
-		const r = ribbons[idx]
-		const angle = (r.angleDeg * Math.PI) / 180
-		const slope = Math.tan(angle)
-		const yAtX0 = r.y + slope * (x0 - w * 0.5)
-		const yAtX1 = r.y + slope * (x1 - w * 0.5)
-		// тень только в финальном режиме
-		ctx.save()
-		if (!isDraft) {
-			ctx.shadowColor = "rgba(0,0,0,0.18)"
-			ctx.shadowBlur = 10
-			ctx.shadowOffsetX = 0
-			ctx.shadowOffsetY = 4
-		}
-		// лента
-		ctx.beginPath()
-		ctx.moveTo(x0, yAtX0)
-		ctx.lineTo(x1, yAtX1)
-		ctx.strokeStyle = ribbonColor
-		ctx.lineWidth = r.height
-		ctx.lineCap = "round"
-		ctx.stroke()
-		ctx.restore()
-		// текст рисуем только в финальном режиме
-		if (opts.textAlways || !isDraft) {
-			const lineAngle = Math.atan2(yAtX1 - yAtX0, x1 - x0)
-			ctx.fillStyle = "rgba(255,255,255,0.92)"
-			const step = Math.max(1, Number(r.step) || 260)
-			const dir = Number.isFinite(r.dir) ? r.dir : (idx % 2 === 0 ? 1 : -1) // чередуем направление
-			const shift = ((textOffset * dir) % step + step) % step
-			for (let x = x0 - shift; x < x1; x += step) {
-				const y = r.y + slope * (x - w * 0.5)
-				ctx.save()
-				ctx.translate(x, y)
-				ctx.rotate(lineAngle)
-				ctx.fillText(text, 0, 0)
-				ctx.restore()
-			}
-		}
-	}
-	// нижнее затухание (можно оставлять и в draft — дёшево)
-	const grad = ctx.createLinearGradient(0, h - fadeH, 0, h)
-	grad.addColorStop(0, "rgba(255,255,255,0)")
-	grad.addColorStop(1, fadeTo)
-	ctx.fillStyle = grad
-	ctx.fillRect(0, h - fadeH, w, fadeH)
-}
-
 function mulberry32(seed) {
 	let a = seed >>> 0
 	return function () {
@@ -338,7 +253,7 @@ function makeRibbonsForSize(seed, w, h) {
 	// базовые углы: как в вашем паттерне + один встречный
 	const angles = [-22, -16, -12, -18, +14]
 
-	const spacing = ribbonSpacingPx(w)
+	const spacing = ribbonSpacingPx(w) * 1.15
 	const margin = Math.hypot(w, h) * 0.25
 
 	// стартуем выше экрана, чтобы не было пустот
@@ -370,47 +285,81 @@ function initRibbonMarquee(section, opts = {}) {
 	const canvas = section.querySelector(".cards-bg")
 	if (!canvas) return
 
-	const ctx = canvas.getContext("2d", { alpha: true })
-	const staticCanvas = document.createElement("canvas")
-	const staticCtx = staticCanvas.getContext("2d", { alpha: true })
+	const isFirefox = /firefox/i.test(navigator.userAgent)
+
+	// В Firefox лучше не разгонять DPR — сильно повышает цену отрисовки
+	const DPR_CAP = isFirefox ? 1 : 2
 
 	const text = opts.text ?? "пробный период 1 месяц"
 	const font = opts.font ?? "600 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial"
 	const ribbonColor = opts.ribbonColor ?? "#6B4CFF"
 	const fadeH = opts.fadeH ?? 220
 	const fadeTo = opts.fadeTo ?? "#fff"
-	const speed = opts.speed ?? 46 // px/sec
-	const seed = opts.seed ?? 123456
+	const speed = opts.speed ?? 42 // px/sec
+
+	const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true })
+
+	// Статичный кэш: ленты/тени/градиент
+	const staticCanvas = document.createElement("canvas")
+	const sctx = staticCanvas.getContext("2d", { alpha: true, desynchronized: true })
 
 	let w = 0
 	let h = 0
 	let dpr = 1
 	let ribbons = []
 	let running = false
-
-	let lastTs = 0
-	let textOffset = 0
 	let rafId = 0
+	let lastTs = 0
+	let offset = 0
 
-	// чуть меньше “бесконечной” длины = меньше текста рисуем
+	// Ограничение области по X, чтобы не рисовать “бесконечность”
 	let x0 = 0
 	let x1 = 0
+	let len = 0
+
+	function makeTextStrip(stepPx, stripH) {
+		// Полоска с повторяющимся текстом (рисуется 1 раз)
+		const stripW = 1024
+		const c = document.createElement("canvas")
+		c.width = stripW
+		c.height = stripH
+		const cctx = c.getContext("2d", { alpha: true, desynchronized: true })
+
+		cctx.clearRect(0, 0, stripW, stripH)
+		cctx.font = font
+		cctx.textBaseline = "middle"
+		cctx.fillStyle = "rgba(255,255,255,0.92)"
+
+		const y = stripH / 2
+		for (let x = 0; x < stripW + stepPx; x += stepPx) {
+			cctx.fillText(text, x, y)
+		}
+		return c
+	}
 
 	function buildRibbons() {
-		ribbons = makeRibbonsForSize(seed, w, h).map((r, idx) => {
+		ribbons = makeRibbonsForSize(123456, w, h).map((r, idx) => {
 			const angle = (r.angleDeg * Math.PI) / 180
 			const slope = Math.tan(angle)
 
-			// ограничиваем диапазон по X, чтобы меньше fillText
 			const yAtX0 = r.y + slope * (x0 - w * 0.5)
 			const yAtX1 = r.y + slope * (x1 - w * 0.5)
 			const lineAngle = Math.atan2(yAtX1 - yAtX0, x1 - x0)
 
+			// высота текстовой полоски (не обязана равняться высоте ленты)
+			const stripH = Math.max(20, Math.round(r.height * 0.7))
+			const strip = makeTextStrip(r.step, stripH)
+
 			return {
 				...r,
 				slope,
+				yAtX0,
+				yAtX1,
 				lineAngle,
-				dir: idx % 2 === 0 ? 1 : -1, // чередуем направления
+				dir: idx % 2 === 0 ? 1 : -1,
+				strip,
+				stripH,
+				stripW: strip.width,
 			}
 		})
 	}
@@ -423,9 +372,8 @@ function initRibbonMarquee(section, opts = {}) {
 		w = newW
 		h = newH
 
-		dpr = Math.min(window.devicePixelRatio || 1, 2)
+		dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP)
 
-		// размер канвасов меняем ТОЛЬКО при ресайзе
 		canvas.width = Math.floor(w * dpr)
 		canvas.height = Math.floor(h * dpr)
 		canvas.style.width = w + "px"
@@ -435,86 +383,83 @@ function initRibbonMarquee(section, opts = {}) {
 		staticCanvas.height = Math.floor(h * dpr)
 
 		ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-		staticCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
+		sctx.setTransform(dpr, 0, 0, dpr, 0, 0)
 
-		// ограничиваем рисование текста по X
-		const pad = Math.max(160, Math.floor(Math.hypot(w, h) * 0.25))
+		const pad = Math.max(140, Math.floor(Math.hypot(w, h) * 0.22))
 		x0 = -pad
 		x1 = w + pad
+		len = x1 - x0
 
 		buildRibbons()
 		drawStatic()
 	}
 
 	function drawStatic() {
-		staticCtx.clearRect(0, 0, w, h)
+		sctx.clearRect(0, 0, w, h)
 
 		// ленты + тени (1 раз)
 		for (let i = 0; i < ribbons.length; i++) {
 			const r = ribbons[i]
-			const yAtX0 = r.y + r.slope * (x0 - w * 0.5)
-			const yAtX1 = r.y + r.slope * (x1 - w * 0.5)
 
-			staticCtx.save()
-			staticCtx.shadowColor = "rgba(0,0,0,0.18)"
-			staticCtx.shadowBlur = 10
-			staticCtx.shadowOffsetX = 0
-			staticCtx.shadowOffsetY = 4
+			sctx.save()
+			sctx.shadowColor = "rgba(0,0,0,0.18)"
+			sctx.shadowBlur = 10
+			sctx.shadowOffsetX = 0
+			sctx.shadowOffsetY = 4
 
-			staticCtx.beginPath()
-			staticCtx.moveTo(x0, yAtX0)
-			staticCtx.lineTo(x1, yAtX1)
-			staticCtx.strokeStyle = ribbonColor
-			staticCtx.lineWidth = r.height
-			staticCtx.lineCap = "round"
-			staticCtx.stroke()
-			staticCtx.restore()
+			sctx.beginPath()
+			sctx.moveTo(x0, r.yAtX0)
+			sctx.lineTo(x1, r.yAtX1)
+			sctx.strokeStyle = ribbonColor
+			sctx.lineWidth = r.height
+			sctx.lineCap = "round"
+			sctx.stroke()
+			sctx.restore()
 		}
 
 		// затухание (1 раз)
-		const grad = staticCtx.createLinearGradient(0, h - fadeH, 0, h)
+		const grad = sctx.createLinearGradient(0, h - fadeH, 0, h)
 		grad.addColorStop(0, "rgba(255,255,255,0)")
 		grad.addColorStop(1, fadeTo)
-		staticCtx.fillStyle = grad
-		staticCtx.fillRect(0, h - fadeH, w, fadeH)
+		sctx.fillStyle = grad
+		sctx.fillRect(0, h - fadeH, w, fadeH)
 	}
 
 	function drawFrame(ts) {
 		if (!running) return
 
-		// ограничение FPS ~30
-		if (lastTs && ts - lastTs < 33) {
+		// Ограничение FPS ~24 (Firefox заметно легче)
+		if (lastTs && ts - lastTs < 55) {
 			rafId = requestAnimationFrame(drawFrame)
 			return
 		}
 
 		const dt = lastTs ? (ts - lastTs) / 1000 : 0
 		lastTs = ts
-		textOffset += dt * speed
+		offset += dt * speed
 
-		// 1) быстро выводим статичный кэш
+		// 1) статичный фон из кэша
 		ctx.clearRect(0, 0, w, h)
 		ctx.drawImage(staticCanvas, 0, 0, w, h)
 
-		// 2) рисуем только текст (дёшево)
-		ctx.font = font
-		ctx.textBaseline = "middle"
-		ctx.fillStyle = "rgba(255,255,255,0.92)"
-
+		// 2) бегущий текст: только drawImage, без fillText
 		for (let i = 0; i < ribbons.length; i++) {
 			const r = ribbons[i]
-			const step = Math.max(1, Number(r.step) || 260)
 
-			const shift = ((textOffset * r.dir) % step + step) % step
+			const shift = ((offset * r.dir) % r.stripW + r.stripW) % r.stripW
 
-			for (let x = x0 - shift; x < x1; x += step) {
-				const y = r.y + r.slope * (x - w * 0.5)
-				ctx.save()
-				ctx.translate(x, y)
-				ctx.rotate(r.lineAngle)
-				ctx.fillText(text, 0, 0)
-				ctx.restore()
+			ctx.save()
+			ctx.translate(x0, r.yAtX0)
+			ctx.rotate(r.lineAngle)
+
+			// Рисуем 2-3 “полоски” чтобы закрыть всю длину
+			let dx = -shift
+			while (dx < len) {
+				ctx.drawImage(r.strip, dx, -r.stripH / 2)
+				dx += r.stripW
 			}
+
+			ctx.restore()
 		}
 
 		rafId = requestAnimationFrame(drawFrame)
@@ -534,15 +479,13 @@ function initRibbonMarquee(section, opts = {}) {
 		lastTs = 0
 	}
 
-	// resize 1 раз + наблюдатели
 	resize()
 
-	const ro = new ResizeObserver(() => {
-		// resize редкий, можно без дебаунса
-		resize()
-	})
+	// обновляем только при реальном изменении размеров
+	const ro = new ResizeObserver(() => resize())
 	ro.observe(section)
 
+	// анимация только когда секция видима
 	const io = new IntersectionObserver(
 		(entries) => {
 			if (entries[0].isIntersecting) start()
@@ -552,28 +495,27 @@ function initRibbonMarquee(section, opts = {}) {
 	)
 	io.observe(section)
 
+	// стоп на скрытой вкладке
 	document.addEventListener("visibilitychange", () => {
 		if (document.hidden) stop()
-		else resize()
+		else start()
 	})
 
-	// стартуем, если сразу видно
 	start()
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	// если секций несколько — применяем ко всем
-	document.querySelectorAll(".cards").forEach((section, idx) => {
+	document.querySelectorAll(".cards").forEach((section) => {
 		initRibbonMarquee(section, {
-			seed: 123456 + idx,
 			text: "пробный период 1 месяц",
 			ribbonColor: "#6B4CFF",
 			fadeH: 220,
 			fadeTo: "#fff",
-			speed: 46,
+			speed: 42,
 		})
 	})
 })
+
 
 function initEconomySettingsUI() {
 	const toggle = document.getElementById("economy-settings-toggle")
