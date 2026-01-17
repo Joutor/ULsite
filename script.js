@@ -366,53 +366,212 @@ function makeRibbonsForSize(seed, w, h) {
 	return ribbons
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-	const section = document.querySelector(".cards")
-	if (!section) return
-	// --- Анимация движения надписей по лентам ---
-	const TEXT = "пробный период 1 месяц"
-	const SPEED_PX_PER_SEC = 46 // скорость прокрутки текста
+function initRibbonMarquee(section, opts = {}) {
+	const canvas = section.querySelector(".cards-bg")
+	if (!canvas) return
+
+	const ctx = canvas.getContext("2d", { alpha: true })
+	const staticCanvas = document.createElement("canvas")
+	const staticCtx = staticCanvas.getContext("2d", { alpha: true })
+
+	const text = opts.text ?? "пробный период 1 месяц"
+	const font = opts.font ?? "600 14px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+	const ribbonColor = opts.ribbonColor ?? "#6B4CFF"
+	const fadeH = opts.fadeH ?? 220
+	const fadeTo = opts.fadeTo ?? "#fff"
+	const speed = opts.speed ?? 46 // px/sec
+	const seed = opts.seed ?? 123456
+
 	let w = 0
 	let h = 0
+	let dpr = 1
 	let ribbons = []
-	let draft = false
-	let finalTimer = 0
+	let running = false
 
-	function rebuild() {
-		w = Math.max(1, section.clientWidth)
-		h = Math.max(1, section.clientHeight)
-		ribbons = makeRibbonsForSize(123456, w, h)
+	let lastTs = 0
+	let textOffset = 0
+	let rafId = 0
+
+	// чуть меньше “бесконечной” длины = меньше текста рисуем
+	let x0 = 0
+	let x1 = 0
+
+	function buildRibbons() {
+		ribbons = makeRibbonsForSize(seed, w, h).map((r, idx) => {
+			const angle = (r.angleDeg * Math.PI) / 180
+			const slope = Math.tan(angle)
+
+			// ограничиваем диапазон по X, чтобы меньше fillText
+			const yAtX0 = r.y + slope * (x0 - w * 0.5)
+			const yAtX1 = r.y + slope * (x1 - w * 0.5)
+			const lineAngle = Math.atan2(yAtX1 - yAtX0, x1 - x0)
+
+			return {
+				...r,
+				slope,
+				lineAngle,
+				dir: idx % 2 === 0 ? 1 : -1, // чередуем направления
+			}
+		})
 	}
 
-	rebuild()
-	const t0 = performance.now()
+	function resize() {
+		const newW = Math.max(1, Math.floor(section.clientWidth))
+		const newH = Math.max(1, Math.floor(section.clientHeight))
+		if (newW === w && newH === h) return
 
-	function frame(now) {
-		const t = (now - t0) / 1000
-		drawRibbonBackground(section, {
-			ribbons,
-			width: w,
-			height: h,
-			text: TEXT,
+		w = newW
+		h = newH
+
+		dpr = Math.min(window.devicePixelRatio || 1, 2)
+
+		// размер канвасов меняем ТОЛЬКО при ресайзе
+		canvas.width = Math.floor(w * dpr)
+		canvas.height = Math.floor(h * dpr)
+		canvas.style.width = w + "px"
+		canvas.style.height = h + "px"
+
+		staticCanvas.width = Math.floor(w * dpr)
+		staticCanvas.height = Math.floor(h * dpr)
+
+		ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+		staticCtx.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+		// ограничиваем рисование текста по X
+		const pad = Math.max(160, Math.floor(Math.hypot(w, h) * 0.25))
+		x0 = -pad
+		x1 = w + pad
+
+		buildRibbons()
+		drawStatic()
+	}
+
+	function drawStatic() {
+		staticCtx.clearRect(0, 0, w, h)
+
+		// ленты + тени (1 раз)
+		for (let i = 0; i < ribbons.length; i++) {
+			const r = ribbons[i]
+			const yAtX0 = r.y + r.slope * (x0 - w * 0.5)
+			const yAtX1 = r.y + r.slope * (x1 - w * 0.5)
+
+			staticCtx.save()
+			staticCtx.shadowColor = "rgba(0,0,0,0.18)"
+			staticCtx.shadowBlur = 10
+			staticCtx.shadowOffsetX = 0
+			staticCtx.shadowOffsetY = 4
+
+			staticCtx.beginPath()
+			staticCtx.moveTo(x0, yAtX0)
+			staticCtx.lineTo(x1, yAtX1)
+			staticCtx.strokeStyle = ribbonColor
+			staticCtx.lineWidth = r.height
+			staticCtx.lineCap = "round"
+			staticCtx.stroke()
+			staticCtx.restore()
+		}
+
+		// затухание (1 раз)
+		const grad = staticCtx.createLinearGradient(0, h - fadeH, 0, h)
+		grad.addColorStop(0, "rgba(255,255,255,0)")
+		grad.addColorStop(1, fadeTo)
+		staticCtx.fillStyle = grad
+		staticCtx.fillRect(0, h - fadeH, w, fadeH)
+	}
+
+	function drawFrame(ts) {
+		if (!running) return
+
+		// ограничение FPS ~30
+		if (lastTs && ts - lastTs < 33) {
+			rafId = requestAnimationFrame(drawFrame)
+			return
+		}
+
+		const dt = lastTs ? (ts - lastTs) / 1000 : 0
+		lastTs = ts
+		textOffset += dt * speed
+
+		// 1) быстро выводим статичный кэш
+		ctx.clearRect(0, 0, w, h)
+		ctx.drawImage(staticCanvas, 0, 0, w, h)
+
+		// 2) рисуем только текст (дёшево)
+		ctx.font = font
+		ctx.textBaseline = "middle"
+		ctx.fillStyle = "rgba(255,255,255,0.92)"
+
+		for (let i = 0; i < ribbons.length; i++) {
+			const r = ribbons[i]
+			const step = Math.max(1, Number(r.step) || 260)
+
+			const shift = ((textOffset * r.dir) % step + step) % step
+
+			for (let x = x0 - shift; x < x1; x += step) {
+				const y = r.y + r.slope * (x - w * 0.5)
+				ctx.save()
+				ctx.translate(x, y)
+				ctx.rotate(r.lineAngle)
+				ctx.fillText(text, 0, 0)
+				ctx.restore()
+			}
+		}
+
+		rafId = requestAnimationFrame(drawFrame)
+	}
+
+	function start() {
+		if (running) return
+		running = true
+		lastTs = 0
+		rafId = requestAnimationFrame(drawFrame)
+	}
+
+	function stop() {
+		running = false
+		if (rafId) cancelAnimationFrame(rafId)
+		rafId = 0
+		lastTs = 0
+	}
+
+	// resize 1 раз + наблюдатели
+	resize()
+
+	const ro = new ResizeObserver(() => {
+		// resize редкий, можно без дебаунса
+		resize()
+	})
+	ro.observe(section)
+
+	const io = new IntersectionObserver(
+		(entries) => {
+			if (entries[0].isIntersecting) start()
+			else stop()
+		},
+		{ threshold: 0.01 }
+	)
+	io.observe(section)
+
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) stop()
+		else resize()
+	})
+
+	// стартуем, если сразу видно
+	start()
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+	// если секций несколько — применяем ко всем
+	document.querySelectorAll(".cards").forEach((section, idx) => {
+		initRibbonMarquee(section, {
+			seed: 123456 + idx,
+			text: "пробный период 1 месяц",
 			ribbonColor: "#6B4CFF",
 			fadeH: 220,
 			fadeTo: "#fff",
-			draft,
-			textAlways: true,
-			textOffset: t * SPEED_PX_PER_SEC,
+			speed: 46,
 		})
-		requestAnimationFrame(frame)
-	}
-
-	requestAnimationFrame(frame)
-	window.addEventListener("resize", () => {
-		draft = true
-		rebuild()
-		clearTimeout(finalTimer)
-		finalTimer = setTimeout(() => {
-			draft = false
-			rebuild()
-		}, 260)
 	})
 })
 
