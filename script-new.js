@@ -276,7 +276,8 @@ function calcHelpdeskTimeSavings(opts = {}) {
 			C_rub_per_hour: p.C
 		}
 	}
-	document.getElementById("economyTime").innerHTML = `≈ ${formatThousandsSpaces(savedHours.toFixed(0))} ч`
+	const hours = Math.round(savedHours);
+	document.getElementById("economyTime").innerHTML = `≈ ${formatThousandsSpaces(hours)} ${pluralizeHours(hours)}`;
 	document.getElementById("economyFte").innerHTML = `≈ ${savedFTE.toFixed(1)} FTE`
 	const costMonth = employeeCounter * pricePerMonth
 	const costYear = employeeCounter * pricePerYear
@@ -328,8 +329,17 @@ function formatEmployees(count) {
 	} else {
 		word = "сотрудников"
 	}
-
 	return `${count} ${word}`
+}
+
+function pluralizeHours(n) {
+	n = Math.abs(n) % 100;
+	const n1 = n % 10;
+
+	if (n > 10 && n < 20) return "часов";
+	if (n1 === 1) return "час";
+	if (n1 >= 2 && n1 <= 4) return "часа";
+	return "часов";
 }
 
 function mulberry32(seed) {
