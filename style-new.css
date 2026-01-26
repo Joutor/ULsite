@@ -578,22 +578,19 @@ header.is-open .mobile-menu {
 	height: 305px;
 	min-height: 0;
 	max-height: none;
-
 	display: flex;
 	flex-direction: column;
 	justify-content: flex-start;
 	align-items: flex-start;
 	gap: 10px;
-
 	padding: 20px;
 	border-radius: 24px;
 	background: var(--bg-light);
-
 	transition: background-color .25s ease;
 }
 
-.stat:hover {
-	background: #DCD7FF;
+.stat:nth-child(1) {
+	background: #D7D2FD;
 }
 
 .stat .big {
@@ -635,6 +632,10 @@ header.is-open .mobile-menu {
 
 .feature-card.narrow{
 	height: 387px;
+}
+
+.feature-card.narrow:nth-child(3){
+	background: #E1DAFF;
 }
 
 .feature-desc {
@@ -769,9 +770,8 @@ header.is-open .mobile-menu {
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	color: #716E7E;
-	transition: background-color .35s cubic-bezier(.2, .8, .2, 1),
-	box-shadow .35s cubic-bezier(.2, .8, .2, 1),
-	transform .35s cubic-bezier(.2, .8, .2, 1);
+	transition: background-color .35s cubic-bezier(.2, .8, .2, 1), box-shadow .35s cubic-bezier(.2, .8, .2, 1), transform .35s cubic-bezier(.2, .8, .2, 1);
+	background: var(--bg-light);
 }
 
 .tool-item:hover {
@@ -787,8 +787,35 @@ header.is-open .mobile-menu {
 	width: 8px;
 	height: 42px;
 	border-radius: 999px;
-	background: var(--primary);
+	background: rgba(90, 66, 255, .16);
+	position: relative;
+	overflow: hidden;
+	opacity: 0;
+	transition: opacity .2s ease;
+}
+
+.tool-item.active .tool-dot {
+	opacity: 1;
 	box-shadow: 0 12px 26px rgba(90, 66, 255, .28);
+}
+
+.tool-dot::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: var(--primary);
+	transform-origin: bottom;
+	transform: scaleY(1);
+}
+
+.tool-dot.timer-run::after {
+	animation: toolDotTimer 10s linear forwards;
+}
+
+@keyframes toolDotTimer {
+	from { transform: scaleY(1); }
+	to   { transform: scaleY(0); }
 }
 
 .tools-right {
@@ -1161,29 +1188,51 @@ header.is-open .mobile-menu {
 	text-align: center;
 }
 
-.contact-card .btn {
-	margin: 0 0 160px 0;
-	gap: 10px;
-	angle: 0 deg;
-	opacity: 1;
-	border-radius: 24px;
-	border-width: 1px;
-	padding: 8px;
-	width: calc(100% - 50px);
-}
+/*.contact-card .btn {*/
+/*	margin: 0 0 160px 0;*/
+/*	gap: 10px;*/
+/*	angle: 0 deg;*/
+/*	opacity: 1;*/
+/*	border-radius: 24px;*/
+/*	border-width: 1px;*/
+/*	padding: 8px;*/
+/*	width: calc(100% - 50px);*/
+/*}*/
 
 .contact-sub {
 	margin: 0 0 12px;
 	font: 400 13px/1.2 Inter, system-ui;
 }
 
-.contact .btn {
-	height: 54px;
-	border-radius: 18px;
-	background: rgba(255, 255, 255, .96);
+/*.contact .btn {*/
+/*	height: 54px;*/
+/*	border-radius: 18px;*/
+/*	background: rgba(255, 255, 255, .96);*/
+/*	justify-content: center;*/
+/*	font: 700 18px/1 Inter, system-ui;*/
+/*	text-transform: uppercase;*/
+/*}*/
+
+.contact-card .btn{
+	width: calc(100% - 50px);
+	height: 70px;
+	margin: 0;
+	padding: 0 28px;
+	display: flex;
+	align-items: center;
 	justify-content: center;
-	font: 700 18px/1 Inter, system-ui;
-	text-transform: uppercase;
+	border-radius: 24px;
+	border: 2px solid rgba(90, 66, 255, .65);
+	background: transparent;
+	color: var(--primary);
+	font: 400 18px/1 Inter, system-ui;
+	text-decoration: none;
+	transition: background .18s ease, border-color .18s ease;
+}
+
+.contact-card .btn:hover{
+	background: rgba(90, 66, 255, .06);
+	border-color: rgba(90, 66, 255, .85);
 }
 
 /* ---------- Footer ---------- */

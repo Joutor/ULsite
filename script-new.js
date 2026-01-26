@@ -899,9 +899,11 @@ function initEconomySettingsUI() {
 		}
 	};
 
-	let activeKey = items.find(i => i.classList.contains("active"))?.dataset.tool || items[0].dataset.tool;
+	const AUTO_MS = 10000;
 
+	let activeKey = items.find(i => i.classList.contains("active"))?.dataset.tool || items[0].dataset.tool;
 	let switchTimer = 0;
+	let autoTimer = 0;
 	let pendingKey = activeKey;
 
 	// На мобилке карточка должна быть ПОД выбранной строкой.
@@ -913,27 +915,56 @@ function initEconomySettingsUI() {
 		if (!activeEl) return;
 
 		if (mqMobile.matches) {
-			// переносим карточку внутрь списка, сразу после активного пункта
 			if (card.parentNode !== toolsLeft || card.previousElementSibling !== activeEl) {
 				toolsLeft.insertBefore(card, activeEl.nextElementSibling);
 			}
 		} else {
-			// возвращаем карточку обратно в грид (после списка)
 			if (card.parentNode !== toolsGrid || card.previousElementSibling !== toolsLeft) {
 				toolsGrid.appendChild(card);
 			}
 		}
 	}
 
-	function setActive(key) {
+	function restartDotTimer() {
+		items.forEach(el => {
+			const dot = el.querySelector(".tool-dot");
+			if (!dot) return;
+
+			dot.classList.remove("timer-run");
+			// форсим перезапуск анимации
+			void dot.offsetWidth;
+
+			if (el.classList.contains("active")) {
+				dot.classList.add("timer-run");
+			}
+		});
+	}
+
+	function scheduleAuto(currentKey) {
+		if (autoTimer) clearTimeout(autoTimer);
+
+		autoTimer = setTimeout(() => {
+			const idx = items.findIndex(i => i.dataset.tool === currentKey);
+			const next = items[(idx + 1) % items.length];
+			setActive(next.dataset.tool, true);
+		}, AUTO_MS);
+	}
+
+	function setActive(key, fromAuto = false) {
 		if (!content[key]) return;
-		if (key === pendingKey) return;
 
 		pendingKey = key;
 
 		// подсветка слева сразу
 		items.forEach(el => el.classList.toggle("active", el.dataset.tool === key));
 		placeCardUnderActiveRow();
+
+		// перезапуск таймера-полоски и автопереключения
+		restartDotTimer();
+		scheduleAuto(key);
+
+		// если это уже активный — просто перезапустили таймер и выходим
+		if (key === activeKey) return;
 
 		if (switchTimer) clearTimeout(switchTimer);
 
@@ -960,10 +991,14 @@ function initEconomySettingsUI() {
 	descEl.textContent = content[initial].desc;
 	placeCardUnderActiveRow();
 
+	// Только клик (убрали hover)
 	items.forEach(el => {
-		el.addEventListener("mouseenter", () => setActive(el.dataset.tool));
-		el.addEventListener("click", () => setActive(el.dataset.tool)); // для мобилок
+		el.addEventListener("click", () => setActive(el.dataset.tool));
 	});
+
+	// Запускаем таймер и автопереключение на старте
+	restartDotTimer();
+	scheduleAuto(activeKey);
 
 	// если пользователь повернул экран / изменил ширину
 	if (mqMobile.addEventListener) {
