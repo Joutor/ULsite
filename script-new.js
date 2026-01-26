@@ -14,7 +14,8 @@ function saveCalcState() {
 			tasksPerMonthCounter,
 			payMode,
 		}))
-	} catch (e) {}
+	} catch (e) {
+	}
 }
 
 function loadCalcState() {
@@ -33,7 +34,8 @@ function loadCalcState() {
 		if (st.payMode === "month" || st.payMode === "year") {
 			payMode = st.payMode
 		}
-	} catch (e) {}
+	} catch (e) {
+	}
 }
 
 
@@ -41,12 +43,12 @@ function loadCalcState() {
 const ECONOMY_STORAGE_KEY = "uldesk_economy_params_v1"
 
 const economyDefaults = {
-	cleanMin: 12,     // “чистое” время решения (мин)
-	costPerHour: 800, // ₽/час
-	chaosMin: 3.0,    // потери на бардак (мин/обращение) = переключения+поиск контекста+ручной SLA
-	dupPct: 8,        // дубли/повторные (%)
-	lostPct: 2,       // потерянные/пропущенные (%)
-	errPct: 4,        // ошибки/переоткрытия (%)
+	cleanMin: 12,      // “чистое” время решения (мин)
+	costPerHour: 800,  // ₽/час
+	chaosMin: 3.0,     // потери на бардак (мин/обращение) = переключения+поиск контекста+ручной SLA
+	lostCases: 9,      // потерянные/пропущенные (случаев/мес)
+	dupCases: 16,      // повторные обращения (случаев/мес)
+	errCases: 13,      // ошибки/переоткрытия (случаев/мес)
 }
 
 function clampNum(v, min, max) {
@@ -58,15 +60,33 @@ function loadEconomyParams() {
 	try {
 		const raw = localStorage.getItem(ECONOMY_STORAGE_KEY)
 		if (!raw) return {...economyDefaults}
+
 		const parsed = JSON.parse(raw)
+		// N нужен только для совместимости со старым форматом в процентах
+		const N = Math.max(1, tasksPerMonthCounter * employeeCounter)
+
+		const pctToCases = (pct) => (N * Number(pct)) / 100
 
 		return {
-			cleanMin: clampNum(Number(parsed.cleanMin), 1, 240),
-			costPerHour: clampNum(Number(parsed.costPerHour), 100, 20000),
-			chaosMin: clampNum(Number(parsed.chaosMin), 0, 240),
-			dupPct: clampNum(Number(parsed.dupPct), 0, 100),
-			lostPct: clampNum(Number(parsed.lostPct), 0, 100),
-			errPct: clampNum(Number(parsed.errPct), 0, 100),
+			cleanMin: clampNum(Number(parsed.cleanMin ?? economyDefaults.cleanMin), 1, 240),
+			costPerHour: clampNum(Number(parsed.costPerHour ?? economyDefaults.costPerHour), 100, 20000),
+			chaosMin: clampNum(Number(parsed.chaosMin ?? economyDefaults.chaosMin), 0, 240),
+
+			// Новая логика: случаи/мес (и совместимость со старым форматом %)
+			lostCases: clampNum(Number(
+				parsed.lostCases ??
+				(parsed.lostPct != null ? pctToCases(parsed.lostPct) : economyDefaults.lostCases)
+			), 0, 1000000),
+
+			dupCases: clampNum(Number(
+				parsed.dupCases ??
+				(parsed.dupPct != null ? pctToCases(parsed.dupPct) : economyDefaults.dupCases)
+			), 0, 1000000),
+
+			errCases: clampNum(Number(
+				parsed.errCases ??
+				(parsed.errPct != null ? pctToCases(parsed.errPct) : economyDefaults.errCases)
+			), 0, 1000000),
 		}
 	} catch (e) {
 		return {...economyDefaults}
@@ -88,12 +108,11 @@ function getEconomyOpts() {
 		T: economyParams.cleanMin,
 		C: economyParams.costPerHour,
 		chaos: economyParams.chaosMin,
-		d: economyParams.dupPct / 100,
-		l: economyParams.lostPct / 100,
-		e: economyParams.errPct / 100,
+		lostCount: economyParams.lostCases,
+		dupCount: economyParams.dupCases,
+		errCount: economyParams.errCases,
 	}
 }
-
 
 function employeeCounterPlus() {
 	employeeCounter += 1
@@ -172,43 +191,62 @@ function calcHelpdeskTimeSavings(opts = {}) {
 		T: 12,
 		// потери “ручной омниканальности/бардака” (мин/заявка)
 		chaos: 3.0,
-		// (3) дубли/повторные обращения
-		d: 0.08,      // 8% дублей
-		tDup: 10,     // лишние минуты на дубль
-		// (4) потерянные/пропущенные обращения
-		l: 0.02,      // 2% теряются
-		tLost: 30,    // среднее время на восстановление/разбор
-		// (5) ошибки/переоткрытия из-за контекста/учёта
-		e: 0.04,      // 4% ошибок/переоткрытий
+		// дефекты по умолчанию заданы долями, но в UI вводятся СЛУЧАИ/МЕС
+		dRate: 0.08,  // повторные обращения (8% от потока)
+		tDup: 10,     // лишние минуты на повторное обращение
+		lRate: 0.02,  // потерянные/пропущенные (2%)
+		tLost: 30,    // время на восстановление/разбор
+		eRate: 0.04,  // ошибки/переоткрытия (4%)
 		tErr: 15,     // время на исправление
 		// (6) стоимость часа
 		C: 800,       // ₽/час
-		// --- Эффект внедрения системы (типовые средние) ---
-		selfService: 0.10,             // доля обращений, не создающихся из-за базы знаний (10%)
-		baseResolutionReduction: 0.10, // ускорение “чистого” решения (10%)
-		overheadReduction: 0.60,       // снижение chaos (60%)
-		defectReduction: 0.50          // снижение дублей/потерь/ошибок (50%)
+		// --- Эффект внедрения системы ---
+		selfService: 0.10,
+		baseResolutionReduction: 0.10,
+		overheadReduction: 0.60,
+		defectReduction: 0.50,
 	}
 	const p = {...defaults, ...opts}
-	// Валидация долей 0..1
-	for (const k of ["d", "l", "e", "selfService", "baseResolutionReduction", "overheadReduction", "defectReduction"]) {
+
+	function clampCount(v, min, max) {
+		if (!Number.isFinite(v)) return min
+		return Math.max(min, Math.min(max, v))
+	}
+
+	// Валидация долей 0..1 (только эффекты внедрения)
+	for (const k of ["selfService", "baseResolutionReduction", "overheadReduction", "defectReduction"]) {
+		if (!Number.isFinite(p[k]) || p[k] < 0 || p[k] > 1) throw new Error(`${k} должно быть числом в диапазоне 0..1`)
+	}
+
+	// В UI теперь вводится не %, а количество случаев в месяц
+	const dupCount = clampCount(Number(p.dupCount ?? (N * p.dRate)), 0, N)
+	const lostCount = clampCount(Number(p.lostCount ?? (N * p.lRate)), 0, N)
+	const errCount = clampCount(Number(p.errCount ?? (N * p.eRate)), 0, N)
+
+	// пересчёт в доли нужен только для отображения/assumptions
+	const d = N > 0 ? dupCount / N : 0
+	const l = N > 0 ? lostCount / N : 0
+	const e = N > 0 ? errCount / N : 0
+
+	for (const k of ["selfService", "baseResolutionReduction", "overheadReduction", "defectReduction"]) {
 		if (!Number.isFinite(p[k]) || p[k] < 0 || p[k] > 1) throw new Error(`${k} должно быть числом в диапазоне 0..1`)
 	}
 	// --- 1) Нагрузка без системы (ручная омниканальность) ---
-	const manualMinutes = N * (p.T + p.chaos) + N * p.d * p.tDup + N * p.l * p.tLost + N * p.e * p.tErr
+	const manualMinutes = N * (p.T + p.chaos) + dupCount * p.tDup + lostCount * p.tLost + errCount * p.tErr
 	// --- 2) Нагрузка с системой ---
 	// часть обращений “съедает” база знаний (самообслуживание)
 	const N_eff = N * (1 - p.selfService)
 	const overheadPerTicket = p.chaos * (1 - p.overheadReduction)
 	const baseT = p.T * (1 - p.baseResolutionReduction)
-	const d_eff = p.d * (1 - p.defectReduction)
-	const l_eff = p.l * (1 - p.defectReduction)
-	const e_eff = p.e * (1 - p.defectReduction)
+	const scale = N > 0 ? (N_eff / N) : 0
+	const dupCount_eff = dupCount * scale * (1 - p.defectReduction)
+	const lostCount_eff = lostCount * scale * (1 - p.defectReduction)
+	const errCount_eff = errCount * scale * (1 - p.defectReduction)
 	const withSystemMinutes =
 		N_eff * (baseT + overheadPerTicket) +
-		N_eff * d_eff * p.tDup +
-		N_eff * l_eff * p.tLost +
-		N_eff * e_eff * p.tErr
+		dupCount_eff * p.tDup +
+		lostCount_eff * p.tLost +
+		errCount_eff * p.tErr
 	// --- 3) Итог: экономия времени и FTE ---
 	const manualHours = manualMinutes / 60
 	const withSystemHours = withSystemMinutes / 60
@@ -226,7 +264,8 @@ function calcHelpdeskTimeSavings(opts = {}) {
 		assumptions: {
 			T_min: p.T,
 			overhead_min_per_ticket: p.chaos,
-			rates: {d: p.d, l: p.l, e: p.e},
+			rates: {d, l, e},
+			counts_per_month: {dupCount, lostCount, errCount},
 			times_min: {tDup: p.tDup, tLost: p.tLost, tErr: p.tErr},
 			effects: {
 				selfService: p.selfService,
@@ -238,12 +277,12 @@ function calcHelpdeskTimeSavings(opts = {}) {
 		}
 	}
 	document.getElementById("economyTime").innerHTML = `≈ ${formatThousandsSpaces(savedHours.toFixed(0))} ч`
-	document.getElementById("economyFte").innerHTML = `≈ ${savedFTE.toFixed(2)} FTE`
+	document.getElementById("economyFte").innerHTML = `≈ ${savedFTE.toFixed(1)} FTE`
 	const costMonth = employeeCounter * pricePerMonth
-	const costYear  = employeeCounter * pricePerYear
+	const costYear = employeeCounter * pricePerYear
 
 	const netMonth = Math.max(0, savedRub - costMonth)
-	const netYear  = Math.max(0, savedRub - costYear)
+	const netYear = Math.max(0, savedRub - costYear)
 
 	const economyMoneyEl = document.getElementById("economyMoney")
 	if (economyMoneyEl) {
@@ -585,7 +624,7 @@ function initEconomySettingsUI() {
 	if (inputs.length < 6) return
 
 	// порядок как в твоём HTML:
-	// 0 cleanMin, 1 chaosMin, 2 lostPct, 3 costPerHour, 4 dupPct, 5 errPct
+	// 0 costPerHour, 1 cleanMin, 2 chaosMin, 3 lostCases, 4 dupCases, 5 errCases
 	const elCost = inputs[0]
 	const elClean = inputs[1]
 	const elChaos = inputs[2]
@@ -602,9 +641,9 @@ function initEconomySettingsUI() {
 		elClean.value = String(economyParams.cleanMin)
 		elCost.value = String(economyParams.costPerHour)
 		elChaos.value = String(economyParams.chaosMin)
-		elDup.value = String(economyParams.dupPct)
-		elLost.value = String(economyParams.lostPct)
-		elErr.value = String(economyParams.errPct)
+		elDup.value = String(economyParams.dupCases)
+		elLost.value = String(economyParams.lostCases)
+		elErr.value = String(economyParams.errCases)
 	}
 
 	let t = 0
@@ -619,9 +658,9 @@ function initEconomySettingsUI() {
 			cleanMin: clampNum(Number(elClean.value), 1, 240),
 			costPerHour: clampNum(Number(elCost.value), 100, 50000),
 			chaosMin: clampNum(Number(elChaos.value), 0, 120),
-			dupPct: clampNum(Number(elDup.value), 0, 100),
-			lostPct: clampNum(Number(elLost.value), 0, 100),
-			errPct: clampNum(Number(elErr.value), 0, 100),
+			dupCases: clampNum(Number(elDup.value), 0, 1000000),
+			lostCases: clampNum(Number(elLost.value), 0, 1000000),
+			errCases: clampNum(Number(elErr.value), 0, 1000000),
 		}
 		saveEconomyParams(economyParams)
 		recalcDebounced()
@@ -638,9 +677,9 @@ function initEconomySettingsUI() {
 		{step: 50, min: 100, max: 50000}, // costPerHour
 		{step: 1, min: 1, max: 240},   // cleanMin
 		{step: 1, min: 0, max: 120},   // chaosMin
-		{step: 1, min: 0, max: 100},   // lostPct
-		{step: 1, min: 0, max: 100},   // dupPct
-		{step: 1, min: 0, max: 100},   // errPct
+		{step: 1, min: 0, max: 1000000},   // lostCases
+		{step: 1, min: 0, max: 1000000},   // dupCases
+		{step: 1, min: 0, max: 1000000},   // errCases
 	]
 
 	steppers.forEach((stepper, idx) => {
@@ -886,30 +925,41 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	// --- Оплата: месяц / год
+	const paySeg = document.querySelector(".pay-seg")
 	const payMonth = document.getElementById("payMonth")
 	const payYear = document.getElementById("payYear")
 
-	if (payMonth) {
-		payMonth.addEventListener("click", () => {
-			payMode = "month"
-			payMonth.classList.add("active")
-			if (payYear) payYear.classList.remove("active")
-			updateEmployeeCounters()
-			saveCalcState()
-			calcHelpdeskTimeSavings(getEconomyOpts())
+	function applyPayMode(mode) {
+		payMode = mode
+
+		if (paySeg) {
+			paySeg.querySelectorAll("button").forEach(b => {
+				const m = b.dataset.pay || (b.id === "payYear" ? "year" : (b.id === "payMonth" ? "month" : null))
+				if (!m) return
+				b.classList.toggle("active", m === mode)
+			})
+		} else {
+			if (payMonth) payMonth.classList.toggle("active", mode === "month")
+			if (payYear) payYear.classList.toggle("active", mode === "year")
+		}
+		updateEmployeeCounters()
+		calcHelpdeskTimeSavings(getEconomyOpts())
+	}
+
+	// клик по сегменту (работает даже если нажали на span внутри кнопки)
+	if (paySeg) {
+		paySeg.addEventListener("click", (e) => {
+			const btn = e.target.closest("button")
+			if (!btn || !paySeg.contains(btn)) return
+
+			const mode = btn.dataset.pay || (btn.id === "payYear" ? "year" : "month")
+			applyPayMode(mode)
 		})
 	}
 
-	if (payYear) {
-		payYear.addEventListener("click", () => {
-			payMode = "year"
-			payYear.classList.add("active")
-			if (payMonth) payMonth.classList.remove("active")
-			updateEmployeeCounters()
-			saveCalcState()
-			calcHelpdeskTimeSavings(getEconomyOpts())
-		})
-	}
+	// страховка на прямые клики по id
+	if (payMonth) payMonth.addEventListener("click", () => applyPayMode("month"))
+	if (payYear) payYear.addEventListener("click", () => applyPayMode("year"))
 
 	// CTA (пересчёт по нажатию)
 	const calcBtn = document.getElementById("calcBtn")

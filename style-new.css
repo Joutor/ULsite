@@ -199,7 +199,7 @@ nav a:hover {
 	height: 44px;
 	padding: 0 18px;
 	border-radius: 16px;
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	background: rgba(255, 255, 255, .92);
 	transition: transform .15s ease, box-shadow .15s ease, filter .25s ease;
 	user-select: none;
@@ -237,7 +237,7 @@ nav a:hover {
 
 /* ---------- Cards ---------- */
 .card {
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	border-radius: var(--r-32);
 	background: var(--bg-light);
 }
@@ -506,7 +506,7 @@ nav a:hover {
 
 .feature-card {
 	background: rgba(255, 255, 255, .92);
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	border-radius: var(--r-32);
 	padding: 18px 18px 16px;
 	/*box-shadow: var(--shadow-soft);*/
@@ -812,7 +812,7 @@ nav a:hover {
 
 .tool-item {
 	background: rgba(255, 255, 255, .92);
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	border-radius: 26px;
 	padding: 24px 16px;
 	/*box-shadow: var(--shadow-soft);*/
@@ -835,7 +835,7 @@ nav a:hover {
 
 .tools-right {
 	background: rgba(255, 255, 255, .92);
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	border-radius: var(--r-32);
 	padding: 16px;
 	display: flex;
@@ -919,15 +919,6 @@ nav a:hover {
 	box-shadow: none;
 }
 
-.btn.primary,
-.calc-cta .calc-main-btn,
-.stepper button,
-.pay-seg button.active {
-	position: relative;
-	overflow: hidden;
-	isolation: isolate;
-}
-
 /* ширина зоны точек (можно подгонять) */
 .btn.primary {
 	--dots-w: 220px;
@@ -941,6 +932,32 @@ nav a:hover {
 	--dots-w: 140px;
 }
 
+.btn.primary,
+.calc-cta .calc-main-btn,
+.stepper button,
+.pay-seg button.active {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+}
+
+.btn.primary {
+	--dots-w: 220px;
+}
+
+.calc-cta .calc-main-btn {
+	--dots-w: 420px;
+}
+
+.stepper button {
+	--dots-w: 40px;
+}
+
+.pay-seg button.active {
+	--dots-w: 140px;
+}
+
+/* точки ПОД текстом */
 .btn.primary::after,
 .calc-cta .calc-main-btn::after,
 .stepper button::after,
@@ -969,7 +986,6 @@ nav a:hover {
 	opacity: .9;
 }
 
-/* текст/иконки поверх точек */
 .btn.primary > *,
 .calc-cta .calc-main-btn > *,
 .stepper button > *,
@@ -1167,7 +1183,7 @@ header .header-actions .btn.primary {
 	height: 54px;
 	border-radius: 18px;
 	background: rgba(255, 255, 255, .96);
-	border: 1px solid var(--stroke);
+	/*border: 1px solid var(--stroke);*/
 	justify-content: center;
 	font: 700 18px/1 Inter, system-ui;
 	text-transform: uppercase;
