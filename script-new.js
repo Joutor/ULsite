@@ -839,6 +839,87 @@ function initEconomySettingsUI() {
 	requestAnimationFrame(tick);
 })();
 
+(function initToolsHoverCard() {
+	const items = Array.from(document.querySelectorAll(".tool-item[data-tool]"));
+	const card = document.getElementById("toolCard");
+	const titleEl = document.getElementById("toolCardTitle");
+	const descEl = document.getElementById("toolCardDesc");
+	const mediaEl = document.getElementById("toolCardMedia");
+
+	if (!items.length || !card || !titleEl || !descEl || !mediaEl) return;
+
+	const content = {
+		automation: {
+			title: "Автоматические ответы на часто задаваемые вопросы",
+			desc: "Настройте шаблоны ответов, триггеры и макросы — система будет помогать оператору отвечать быстрее и точнее.",
+			img: "/img/automation.jpg"
+		},
+		priority: {
+			title: "Подсветка приоритетов и сроков",
+			desc: "Просроченные и срочные заявки видны сразу: проще контролировать SLA и не пропускать важное.",
+			img: "/img/sla.jpg"
+		},
+		filters: {
+			title: "Гибкие фильтры и сортировки",
+			desc: "Быстро находите нужные заявки по статусам, приоритетам, исполнителям и тегам.",
+			img: "/img/filters.jpg"
+		},
+		chat: {
+			title: "Чат операторов внутри каждой заявки",
+			desc: "Обсуждайте решение внутри заявки, не теряя контекст и историю обращения.",
+			img: "/img/in_task_chat.jpg"
+		},
+		request: {
+			title: "Заявка-ориентированная система",
+			desc: "Один клиент — много заявок. Процесс поддержки становится структурным и масштабируемым.",
+			img: "/img/chat-tasks.jpg"
+		}
+	};
+
+	let activeKey = items.find(i => i.classList.contains("active"))?.dataset.tool || items[0].dataset.tool;
+
+	let switchTimer = 0;
+	let pendingKey = activeKey;
+
+	function setActive(key) {
+		if (!content[key]) return;
+		if (key === pendingKey) return;
+
+		pendingKey = key;
+
+		// подсветка слева сразу
+		items.forEach(el => el.classList.toggle("active", el.dataset.tool === key));
+
+		if (switchTimer) clearTimeout(switchTimer);
+
+		// 1) запускаем плавное исчезновение
+		card.classList.add("is-changing");
+		switchTimer = window.setTimeout(() => {
+			if (pendingKey !== key) return;
+
+			titleEl.textContent = content[key].title;
+			descEl.textContent = content[key].desc;
+			mediaEl.innerHTML = `<img src="${content[key].img}" alt="" loading="lazy">`;
+
+			requestAnimationFrame(() => {
+				card.classList.remove("is-changing");
+			});
+
+			activeKey = key;
+			switchTimer = 0;
+		}, 140);
+	}
+	// выставим начальное значение
+	const initial = content[activeKey] ? activeKey : items[0].dataset.tool;
+	titleEl.textContent = content[initial].title;
+	descEl.textContent = content[initial].desc;
+
+	items.forEach(el => {
+		el.addEventListener("mouseenter", () => setActive(el.dataset.tool));
+		el.addEventListener("click", () => setActive(el.dataset.tool)); // для мобилок
+	});
+})();
+
 document.addEventListener("DOMContentLoaded", () => {
 	document.querySelectorAll(".cards").forEach((section) => {
 		initRibbonMarquee(section, {

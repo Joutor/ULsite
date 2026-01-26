@@ -220,16 +220,34 @@
 			<div class="tools-grid">
 
 				<div class="tools-left">
-					<div class="tool-item"><span class="tool-dot"></span>Гибкая автоматизация</div>
-					<div class="tool-item"><span class="tool-dot"></span>Подсветка приоритетов и сроков</div>
-					<div class="tool-item"><span class="tool-dot"></span>Гибкие фильтры</div>
-					<div class="tool-item"><span class="tool-dot"></span>Подсветка приоритетов и сроков</div>
-					<div class="tool-item"><span class="tool-dot"></span>Чат операторов внутри каждой заявки</div>
-					<div class="tool-item"><span class="tool-dot"></span>Заявка-ориентированная система</div>
+					<div class="tool-item active" data-tool="automation">
+						<span class="tool-dot"></span>Гибкая автоматизация
+					</div>
+					<div class="tool-item" data-tool="priority">
+						<span class="tool-dot"></span>
+						Подсветка приоритетов и сроков
+					</div>
+					<div class="tool-item" data-tool="filters">
+						<span class="tool-dot"></span>Гибкие фильтры
+					</div>
+					<div class="tool-item" data-tool="chat">
+						<span class="tool-dot"></span>Чат операторов внутри каждой заявки
+					</div>
+					<div class="tool-item" data-tool="request">
+						<span class="tool-dot"></span>Заявка-ориентированная система
+					</div>
 				</div>
 
-				<div class="tools-right">
-					<div class="img-placeholder" aria-label="Скриншот"></div>
+				<div class="tools-right" id="toolCard" aria-live="polite">
+					<div class="tool-card-title" id="toolCardTitle">Автоматические ответы на часто задаваемые вопросы
+					</div>
+					<div class="tool-card-desc" id="toolCardDesc">
+						Настройте правила, шаблоны и макросы — система будет помогать оператору отвечать быстрее и
+						точнее.
+					</div>
+					<div class="tool-card-media" id="toolCardMedia">
+						<img class="tool-card-img" src="/img/automation.jpg" alt=""/>
+					</div>
 				</div>
 
 			</div>
@@ -360,6 +378,11 @@
 						<p class="val" id="economyFte">≈ 0.05 FTE</p>
 						<span class="hint" aria-hidden="true">?</span>
 					</div>
+				</div>
+
+				<div class="price-policy">
+					<p>Покупаемая лицензия ограничивает лишь число учетных записей и не накладывает никаких ограничений
+						на количество клиентов, организаций или каналов связи.</p>
 				</div>
 
 				<div class="calc-cta">
