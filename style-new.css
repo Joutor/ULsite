@@ -1583,3 +1583,8 @@ footer {
 		transform: none !important;
 	}
 }
+
+a.primary {
+	width: 100%;
+	height: 70px;
+}
