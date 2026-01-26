@@ -45,7 +45,9 @@
 <header>
 	<div class="container">
 		<div class="header-row">
-			<img src="/img/uldesk_logo_new.svg" alt="logo" class="logo"/>
+			<a href="#start" class="logo">
+				<img src="/img/uldesk_logo_new.svg" alt="logo" class="logo"/>
+			</a>
 
 			<button class="header-burger" id="burgerBtn" aria-label="Меню">☰</button>
 
@@ -77,7 +79,7 @@
 	</div>
 </header>
 
-<main>
+<main id="start">
 
 	<!-- HERO -->
 	<section class="hero">
@@ -132,7 +134,7 @@
 
 			<div class="stats">
 				<div class="stat">
-					<p class="big">МЕНЬШЕ ХАОСА</p>
+					<p class="big">Меньше хаоса</p>
 					<p class="small">Больше результата</p>
 				</div>
 				<div class="stat">
@@ -171,14 +173,14 @@
 					></object>
 				</div>
 
-				<div class="feature-card">
+				<div class="feature-card wide">
 					<h3 class="feature-title">Не теряйте контекст</h3>
 					<p class="feature-desc">
 						Все обращения из каналов попадают в единую очередь чатов, где формируются заявки.
 					</p>
 				</div>
 
-				<div class="feature-card">
+				<div class="feature-card wide">
 					<h3 class="feature-title">Ответьте точно в срок</h3>
 					<p class="feature-desc">
 						Система подсвечивает срочное и просроченное, помогает держать обещанное время ответа.
@@ -188,19 +190,21 @@
 			</div>
 
 			<div class="features-row3">
-				<div class="feature-card">
+				<div class="feature-card narrow">
 					<h3 class="feature-title">Работайте на любом устройстве</h3>
 					<p class="feature-desc">Будьте всегда в курсе всех обновлений по заявкам.</p>
 				</div>
 
-				<div class="feature-card">
+				<div class="feature-card narrow">
 					<h3 class="feature-title">Работайте в облаке</h3>
-					<p class="feature-desc">Доступ из любой точки. Без сложного внедрения.</p>
+					<p class="feature-desc">Система подсвечивает срочное и просроченное, помогает держать обещанное
+						время ответа.</p>
 				</div>
 
-				<div class="feature-card">
+				<div class="feature-card narrow">
 					<h3 class="feature-title">Опирайтесь на заявки</h3>
-					<p class="feature-desc">Стандартизируйте процесс и исключите хаос переписок.</p>
+					<p class="feature-desc">Система подсвечивает срочное и просроченное, помогает держать обещанное
+						время ответа.</p>
 				</div>
 			</div>
 
@@ -270,7 +274,7 @@
 	<!-- CALCULATOR -->
 	<section id="pricing" class="calc">
 		<div class="container">
-			<div class="section-title">ПОСЧИТАЙТЕ ЭКОНОМИЮ</div>
+			<div class="section-title">посчитайте экономию</div>
 			<p class="calc-sub">За месяц работы</p>
 
 			<div class="calc-card">
@@ -423,35 +427,56 @@
 
 </main>
 
-<footer>
+<footer class="site-footer">
 	<div class="container">
-		<div class="footer-grid">
-			<div>
-				<div class="footer-links">
-					<a href="#features">Возможности</a>
-					<a href="#tools">Инструменты</a>
-					<a href="#pricing">Цены</a>
-				</div>
+		<div class="footer-card">
+
+			<div class="footer-head">
+				<img class="footer-logo" src="/img/logo_footer.svg" alt="ULDESK"/>
 			</div>
 
-			<div>
-				<div class="footer-links">
-					<span>г. Москва</span>
-					<span>telegram: <a href="https://t.me/uldesk_help_bot" target="_blank">@uldesk_help_bot</a></span>
-					<span>почта: <a href="mailto://info@uldesk.ru" target="_blank">info@uldesk.ru</a></span>
+			<div class="footer-grid">
+
+				<!-- col 1 -->
+				<div class="footer-col">
+					<div class="footer-links">
+						<a href="#features">Возможности</a>
+						<a href="#tools">Инструменты</a>
+						<a href="#pricing">Цены</a>
+					</div>
 				</div>
+
+				<!-- col 2 -->
+<!--				<div class="footer-col">-->
+<!--					<div class="footer-links">-->
+<!--						<a href="/privacy">Политика конфиденциальности</a>-->
+<!--						<a href="/offer">Публичная оферта</a>-->
+<!--					</div>-->
+<!--				</div>-->
+
+				<!-- col 3 -->
+				<div class="footer-col">
+					<div class="footer-links">
+						<span>telegram: <a href="https://t.me/uldesk_help_bot" target="_blank">@uldesk_help_bot</a></span>
+						<span>почта: <a href="mailto:info@uldesk.ru" target="_blank">info@uldesk.ru</a></span>
+					</div>
+				</div>
+
+				<!-- col 4 (если нужен как в макете — раскомментируй) -->
+<!--				<div class="footer-col">-->
+<!--					<div class="footer-links">-->
+<!--						<span>ИП Ломакин Пётр</span>-->
+<!--						<span>ИНН: 123456789012</span>-->
+<!--						<span>ОГРНИП: 192837192837129847</span>-->
+<!--					</div>-->
+<!--				</div>-->
+
 			</div>
 
-			<!--			<div>-->
-			<!--				<div class="footer-links">-->
-			<!--					<span>ИНН: 123456789012</span>-->
-			<!--					<span>ОГРНИП: 12362378237129847</span>-->
-			<!--				</div>-->
-			<!--			</div>-->
+			<div class="footer-bottom">uldesk 2026 ©</div>
 		</div>
-
-		<div class="footer-bottom">uldesk 2026 ©</div>
 	</div>
 </footer>
+
 </body>
 </html>
