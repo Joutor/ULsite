@@ -709,9 +709,20 @@ function initEconomySettingsUI() {
 		toggle.setAttribute("aria-expanded", String(isOpen))
 		panel.setAttribute("aria-hidden", String(!isOpen))
 		toggle.textContent = isOpen ? "Скрыть параметры" : "Показать параметры"
-		if (isOpen) syncUI()
+		if (isOpen) {
+			syncUI()
+			// авто-высота, чтобы не резалось на мобилке
+			panel.style.maxHeight = panel.scrollHeight + "px"
+		} else {
+			panel.style.maxHeight = "0px"
+		}
 	})
-
+	// если экран повернули или изменилась ширина — пересчитать высоту
+	window.addEventListener("resize", () => {
+		if (panel.classList.contains("open")) {
+			panel.style.maxHeight = panel.scrollHeight + "px"
+		}
+	})
 	// старт
 	syncUI()
 }
@@ -841,12 +852,14 @@ function initEconomySettingsUI() {
 
 (function initToolsHoverCard() {
 	const items = Array.from(document.querySelectorAll(".tool-item[data-tool]"));
+	const toolsGrid = document.querySelector(".tools-grid");
+	const toolsLeft = document.querySelector(".tools-left");
 	const card = document.getElementById("toolCard");
 	const titleEl = document.getElementById("toolCardTitle");
 	const descEl = document.getElementById("toolCardDesc");
 	const mediaEl = document.getElementById("toolCardMedia");
 
-	if (!items.length || !card || !titleEl || !descEl || !mediaEl) return;
+	if (!items.length || !toolsGrid || !toolsLeft || !card || !titleEl || !descEl || !mediaEl) return;
 
 	const content = {
 		automation: {
@@ -881,6 +894,27 @@ function initEconomySettingsUI() {
 	let switchTimer = 0;
 	let pendingKey = activeKey;
 
+	// На мобилке карточка должна быть ПОД выбранной строкой.
+	// На десктопе — справа как сейчас.
+	const mqMobile = window.matchMedia("(max-width: 620px)");
+
+	function placeCardUnderActiveRow() {
+		const activeEl = toolsLeft.querySelector(".tool-item.active") || items[0];
+		if (!activeEl) return;
+
+		if (mqMobile.matches) {
+			// переносим карточку внутрь списка, сразу после активного пункта
+			if (card.parentNode !== toolsLeft || card.previousElementSibling !== activeEl) {
+				toolsLeft.insertBefore(card, activeEl.nextElementSibling);
+			}
+		} else {
+			// возвращаем карточку обратно в грид (после списка)
+			if (card.parentNode !== toolsGrid || card.previousElementSibling !== toolsLeft) {
+				toolsGrid.appendChild(card);
+			}
+		}
+	}
+
 	function setActive(key) {
 		if (!content[key]) return;
 		if (key === pendingKey) return;
@@ -889,6 +923,7 @@ function initEconomySettingsUI() {
 
 		// подсветка слева сразу
 		items.forEach(el => el.classList.toggle("active", el.dataset.tool === key));
+		placeCardUnderActiveRow();
 
 		if (switchTimer) clearTimeout(switchTimer);
 
@@ -913,14 +948,57 @@ function initEconomySettingsUI() {
 	const initial = content[activeKey] ? activeKey : items[0].dataset.tool;
 	titleEl.textContent = content[initial].title;
 	descEl.textContent = content[initial].desc;
+	placeCardUnderActiveRow();
 
 	items.forEach(el => {
 		el.addEventListener("mouseenter", () => setActive(el.dataset.tool));
 		el.addEventListener("click", () => setActive(el.dataset.tool)); // для мобилок
 	});
+
+	// если пользователь повернул экран / изменил ширину
+	if (mqMobile.addEventListener) {
+		mqMobile.addEventListener("change", placeCardUnderActiveRow);
+	} else if (mqMobile.addListener) {
+		mqMobile.addListener(placeCardUnderActiveRow);
+	}
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
+	// Защита от двойной инициализации (на мобилках/при дубле скриптов кнопки могли срабатывать 2 раза)
+	if (window.__uldesk_landing_dom_inited) {
+	} else {
+		window.__uldesk_landing_dom_inited = true
+	}
+
+	const burgerBtn = document.getElementById("burgerBtn");
+	const mobileMenu = document.getElementById("mobileMenu");
+	const header = document.querySelector("header");
+
+	if (burgerBtn && mobileMenu && header) {
+		burgerBtn.addEventListener("click", () => {
+			header.classList.toggle("is-open");
+		});
+
+		// закрытие по клику вне меню
+		document.addEventListener("click", (e) => {
+			const menu = document.getElementById("mobileMenu");
+			const burger = document.getElementById("burgerBtn");
+			if (!menu || !burger) return;
+
+			const clickedMenu = menu.contains(e.target);
+			const clickedBurger = burger.contains(e.target);
+
+			if (!clickedMenu && !clickedBurger) {
+				header.classList.remove("is-open");
+			}
+		});
+
+		// закрыть после клика по пункту
+		mobileMenu.querySelectorAll("a").forEach((a) => {
+			a.addEventListener("click", () => header.classList.remove("is-open"));
+		});
+	}
+
 	document.querySelectorAll(".cards").forEach((section) => {
 		initRibbonMarquee(section, {
 			text: "пробный период 1 месяц",
@@ -1038,9 +1116,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		})
 	}
 
-	// страховка на прямые клики по id
-	if (payMonth) payMonth.addEventListener("click", () => applyPayMode("month"))
-	if (payYear) payYear.addEventListener("click", () => applyPayMode("year"))
+	// страховка на прямые клики по id (только если нет делегирования через .pay-seg)
+	if (!paySeg) {
+		if (payMonth) payMonth.addEventListener("click", () => applyPayMode("month"))
+		if (payYear) payYear.addEventListener("click", () => applyPayMode("year"))
+	}
 
 	// CTA (пересчёт по нажатию)
 	const calcBtn = document.getElementById("calcBtn")

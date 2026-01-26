@@ -1,401 +1,457 @@
-<!DOCTYPE html>
-<html lang="rus">
+<!doctype html>
+<html lang="ru">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 	<title>ULDESK</title>
-	<link rel="stylesheet" href="style.css">
 	<link rel="icon" type="image/x-icon" href="./img/favicon.png">
+	<link rel="stylesheet" href="/fonts/Inter/inter.css"/>
+	<link rel="stylesheet" href="style-new.css">
+
 	<!-- Yandex.Metrika counter -->
-	<script type="text/javascript">     (function (m, e, t, r, i, k, a) {
-		m[i] = m[i] || function () {
-			(m[i].a = m[i].a || []).push(arguments)
-		};
-		m[i].l = 1 * new Date();
-		for (var j = 0; j < document.scripts.length; j++) {
-			if (document.scripts[j].src === r) {
-				return;
+	<script type="text/javascript">
+		(function (m, e, t, r, i, k, a) {
+			m[i] = m[i] || function () {
+				(m[i].a = m[i].a || []).push(arguments)
+			};
+			m[i].l = 1 * new Date();
+			for (var j = 0; j < document.scripts.length; j++) {
+				if (document.scripts[j].src === r) {
+					return;
+				}
 			}
-		}
-		k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-	})(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=106306632', 'ym');
-	ym(106306632, 'init', {
-		ssr: true,
-		webvisor: true,
-		clickmap: true,
-		ecommerce: "dataLayer",
-		accurateTrackBounce: true,
-		trackLinks: true
-	}); </script>
+			k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+		})(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=106306632', 'ym');
+		ym(106306632, 'init', {
+			ssr: true,
+			webvisor: true,
+			clickmap: true,
+			ecommerce: "dataLayer",
+			accurateTrackBounce: true,
+			trackLinks: true
+		});
+	</script>
 	<noscript>
 		<div><img src="https://mc.yandex.ru/watch/106306632" style="position:absolute; left:-9999px;" alt=""/></div>
-	</noscript> <!-- /Yandex.Metrika counter -->
+	</noscript>
+	<script src="../../../Downloads/script-new-fixed2.js"></script>
+	<script src="../../../Downloads/script-new(1).js"></script>
+	<!-- /Yandex.Metrika counter -->
 </head>
-<body style="margin: 0; padding: 0;">
-<script src="script.js" defer></script>
 
-<header class="header">
+<body>
+<script src="script-new.js" defer></script>
+
+<header>
 	<div class="container">
-		<img src="img/logo.svg" alt="uld_logo" class="header_logo">
+		<div class="header-row">
+			<img src="/img/uldesk_logo_new.svg" alt="logo" class="logo"/>
 
-		<nav class="header_nav">
-			<ul class="header_list">
-				<li><a href="#C1">Возможности</a></li>
-				<li><a href="#C2">Стоимость</a></li>
-				<li><a
-					href="https://t.me/uldesk_help_bot"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="btn"
-				>Связаться</a></li>
-				<li><a
-					href="https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo"
-					target="_blank"
-					rel="noopener noreferrer"
-					class="main_btn"
-					style="font-size: 16px; padding: 12px;"
-				>Попробовать демо</a></li>
-			</ul>
-		</nav>
+			<button class="header-burger" id="burgerBtn" aria-label="Меню">☰</button>
+
+			<div class="mobile-menu" id="mobileMenu">
+				<a href="#features">Возможности</a>
+				<a href="#tools">Инструменты</a>
+				<a href="#pricing">Цены</a>
+				<a href="https://t.me/uldesk_help_bot" target="_blank">Написать</a>
+				<a class="mobile-menu-cta"
+				   href="https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo"
+				   target="_blank">Попробовать демо</a>
+			</div>
+
+			<nav>
+				<a href="#features">Возможности</a>
+				<a href="#tools">Инструменты</a>
+				<a href="#pricing">Цены</a>
+			</nav>
+
+			<div class="header-actions">
+				<a class="header-write" href="https://t.me/uldesk_help_bot" target="_blank">Написать</a>
+				<a class="btn primary"
+				   href="https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo"
+				   target="_blank">
+					<span>Попробовать</span>
+				</a>
+			</div>
+		</div>
 	</div>
 </header>
-<main class="main">
-	<section class="welcome">
-		<div class="container">
-			<img src="./img/header_3.svg" alt="header" style="width: 100%;">
-			<p><b>ULDESK</b> — облачный, заявка-ориентированный helpdesk для поддержки множества клиентов из разных
-				обслуживаемых организаций. Вы ведёте с ними непрерывный диалог, как в мессенджере, в единой
-				очереди чатов по клиентам.</p>
-			<button
-				class="main_btn"
-				onclick="window.open('https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo')"
-			>
-				Попробовать демо
-			</button>
-		</div>
-	</section>
 
-	<section class="features">
-		<div class="container">
-			<div class="feature_wrapper">
-				<div class="feature_img">
-					<img src="./img/template_illustratio.svg" alt="ill">
-				</div>
-				<div class="feature">
-					<h1>Польза для вас</h1>
-					<p>ULDESK решает следующие проблемы:</p>
-					<ul>
-						<li><b>Контроль исполнения:</b> отображение ответственных, статусов и сроков
-						</li> <!--, аудит действий — видно, где и почему остановилось-->
-						<li><b>Потеря обращений в личных сообщениях:</b> обращения и заявки в едином списке чатов
-						</li>
-						<li><b>Соблюдение SLA и дедлайнов</b>: система подсвечивает срок исполнения заявок и ответов
-						</li>
-						<li><b>Невозможно масштабировать поддержку:</b> стандартизированный процесс заявок, база
-							знаний и шаблоны ответов.
-						</li>
-						<!--, отчёты по нагрузке и скорости-->
-						<li><b>Слишком много времени тратится на рутину:</b> один интерфейс для всех каналов и карточка
-							заявки с полным контекстом - меньше переключений и повторных вопросов.
-						</li>
-						<!--<li><b>Нет аналитики и понимания, что улучшать:</b> Отчёты: время первого ответа/решения,-->
-						<!--	просрочки, загрузка сотрудников, типы обращений.-->
-						<!--</li>-->
-					</ul>
-				</div>
-			</div>
-			<div class="feature_wrapper">
-				<div class="feature">
-					<h1>Инструменты для работы с заявками</h1>
-					<p>ULDESK предоставляет все необходимые инструменты для эффективной работы с заявками в IT:
-					<ul>
-						<li><b>Поиск по сообщениям и заявкам:</b> мгновенный доступ к нужной информации.</li>
-						<li><b>Гибкие фильтры:</b> настройте фильтры под свои потребности для быстрого поиска и
-							обработки заявок.
-						</li>
-						<li><b>SLA и дедлайны:</b> контроль сроков.</li>
-						<li><b>Назначение исполнителя:</b> ответственный зафиксирован в заявке.</li>
-					</ul>
-				</div>
-				<div class="feature_img">
-					<img src="./img/template_illustratio (3).svg" alt="ill">
-				</div>
-			</div>
-			<div class="feature_wrapper">
-				<div class="feature_img">
-					<!--TODO replace to another image-->
-					<img src="./img/template_illustratio (1).svg" alt="ill">
-				</div>
-				<div class="feature">
-					<h1>Автоматизация и шаблоны</h1>
-					<p>Ускорьте работу с помощью инструментов автоматизации:</p>
-					<ul>
-						<li><b>Шаблоны ответов с шорткатами:</b> быстрый доступ на часто задаваемые вопросы и мгновенный
-							ввод заранее прописанного текста.
-						</li>
-						<li><b>База знаний:</b> позволяет иметь все необходимые инструкции под рукой</li>
-						<!--<li><b>Макросы:</b> Автоматизация рутинных задач для повышения продуктивности.</li>-->
-					</ul>
-				</div>
-			</div>
-			<div class="feature_wrapper">
-				<div class="feature">
-					<h1>Мультиканальная поддержка</h1>
-					<p>ULDESK поддерживает самые популярные каналы связи, с легким и быстрым подключением:</p>
-					<!-- любого количества инстансов -->
-					<ul>
-						<li><b>Telegram:</b> быстрое и удобное общение.</li>
-						<li><b>WhatsApp:</b> популярный мессенджер для связи с клиентами.</li>
-						<li><b>Email:</b> традиционный и надежный канал.</li>
-					</ul>
-				</div>
-				<div class="feature_img">
-					<img src="./img/template_illustratio (2).svg" alt="ill">
-				</div>
-			</div>
-		</div>
-	</section>
+<main>
 
-	<section class="cards">
-		<canvas class="cards-bg" aria-hidden="true" style="margin-top: 260px;"></canvas>
+	<!-- HERO -->
+	<section class="hero">
 		<div class="container">
-			<h1 style="text-align: center;" id="C1">Поможем вам работать <br> эффективнее</h1>
-			<p style="text-align: center;">Мы предлагаем вашей команде полный набор инструментов для IT-поддержки</p>
-			<div class="card_wrapper">
-				<div class="card">
-					<img src="./img/task.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>Преимущества</h2>
-					<ul>
-						<li>Облачная, заявка-ориентированная, B2B helpdesk-система</li>
-						<li><b>Облачный сервис:</b> доступ из любой точки, без установки и с мгновенными обновлениями у
-							вас в компании.
-						</li>
-						<li><b>WEB-приложение:</b> работает в браузере — новые сотрудники подключаются за минуты.</li>
-					</ul>
-				</div>
-				<div class="card">
-					<img src="./img/web.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>Преимущества для IT-команд</h2>
-					<ul>
-						<li><b>Низкая цена:</b> оптимальное соотношение цены и функционала.</li>
-						<li><b>Современный, отзывчивый и понятный интерфейс:</b> Одна панель для всех обращений,
-							карточки заявок в чате клиента. Ничего не теряется в личных сообщениях ваших сотрудников
-						</li>
-					</ul>
-				</div>
-				<div class="card">
-					<img src="./img/doc.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>Продвинутое управление заявками</h2>
-					<p>Заявки в ULDESK обладают всеми необходимыми свойствами для IT-сферы:</p>
-					<ul>
-						<li><b>Теги:</b> классификация заявок по категориям.</li>
-						<li><b>Приоритеты:</b> определение важности заявок для своевременной обработки.</li>
-						<li><b>Статусы:</b> мониторинг этапов выполнения заявок.</li>
-					</ul>
-				</div>
-				<div class="card">
-					<img src="./img/phone.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>Работайте на любом устройстве</h2>
-					<p>Интерфейс ULDESK адаптивный. Вы можете быть всегда в курсе всех обновления по заявкам,
-						подключились и работаете без установки и обслуживания сервера.</p>
-				</div>
-				<div class="card">
-					<img src="./img/click.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>Используйте понятный интерфейс</h2>
-					<p>Мы разработали интуитивный и простой интерфейс, к которому можно легко привыкнуть за минимальное
-						количество времени.
+
+			<div class="hero-grid">
+				<div class="card hero-left">
+					<h1 class="hero-title">
+						Вся поддержка<br/>
+						в <span class="accent">одном</span> месте
+					</h1>
+
+					<p class="hero-sub">
+						Облачный helpdesk для работы с заявками.<br/>
+						Спроектирован для B2B
 					</p>
-					<!--<a style="color: white;" href="#!">Узнать больше</a>-->
+
+					<div class="hero-cta">
+						<a class="btn primary"
+						   href="https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo"
+						   target="_blank">
+							<span>Попробовать демо</span>
+						</a>
+					</div>
 				</div>
-				<div class="card">
-					<img src="./img/2 docs.svg" alt="ill" style="width: 30%; margin-bottom: 20px;">
-					<h2>База знаний</h2>
-					<p>Соберите все необходимые данные в одном месте для быстрого доступа. Легкий доступ к технической
-						информации и инструкциям.
+
+				<div class="card hero-right" aria-label="Изображение">
+					<div class="welcome-anim" aria-hidden="true">
+						<img class="welcome-ellipse" src="/img/welcome_ellipse.svg" alt=""/>
+						<img class="welcome-person" src="/img/welcome_stick.svg" alt=""/>
+
+						<div class="welcome-orbit">
+							<div class="welcome-channel ch-wa">
+								<img src="/img/logo_wa.svg" alt=""/>
+							</div>
+
+							<div class="welcome-channel ch-tg">
+								<img src="/img/logo_tg.svg" alt=""/>
+							</div>
+
+							<div class="welcome-channel ch-email">
+								<img src="/img/logo_email.svg" alt=""/>
+							</div>
+
+							<div class="welcome-channel ch-max">
+								<img src="/img/logo_max.svg" alt=""/>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="stats">
+				<div class="stat">
+					<p class="big">МЕНЬШЕ ХАОСА</p>
+					<p class="small">Больше результата</p>
+				</div>
+				<div class="stat">
+					<p class="big">1 месяц</p>
+					<p class="small">Пробный период</p>
+				</div>
+				<div class="stat">
+					<p class="big">рост</p>
+					<p class="small">Без перегруза команды</p>
+				</div>
+				<div class="stat">
+					<p class="big" style="font-weight: 650">∞</p>
+					<p class="small">Заявок на один чат</p>
+				</div>
+			</div>
+
+		</div>
+	</section>
+
+	<!-- FEATURES -->
+	<section id="features" class="features">
+		<div class="container">
+			<div class="section-title">Возможности</div>
+
+			<div class="features-grid">
+
+				<div class="feature-card feature-with-image">
+					<div>
+						<h3 class="feature-title">Назначьте ответственных</h3>
+						<p class="feature-desc">Система поможет контролировать сроки и статусы.</p>
+					</div>
+					<object class="feature-img big-head-svg"
+							type="image/svg+xml"
+							data="/img/big_head.svg"
+							aria-label="big head"
+					></object>
+				</div>
+
+				<div class="feature-card">
+					<h3 class="feature-title">Не теряйте контекст</h3>
+					<p class="feature-desc">
+						Все обращения из каналов попадают в единую очередь чатов, где формируются заявки.
 					</p>
 				</div>
-			</div>
-		</div>
-	</section>
 
-	<section class="details">
-		<div class="container">
-			<h1 style="text-align: center;" id="details">Особенности</h1>
-			<p>ULDESK — заявка-ориентированная система: тикеты создаются вручную оператором, когда по контексту понятно,
-				что необходима работа с контролем исполнения, что позволяет в быстром доступе иметь заявки по каждому
-				отдельному клиенту. ULdesk — простая и гибкая система, которая позволяет редактировать все необходимые
-				атрибуты в общем списке “Заявки» в виде таблицы или карточек: приоритеты, сроки под дедлайнам и
-				другое.</p>
-			<p>ULDESK — обладает множеством удобных решений, такими как:</p>
-			<ul>
-				<li>Чат операторов поддержки внутри каждой заявки</li>
-				<li>Комментарии, видные только операторам, в чате с клиентом</li>
-				<li>Мощной системой фильтрации заявок по каждому из атрибутов</li>
-				<li>Массовыми действиями с заявками</li>
-			</ul>
-		</div>
-	</section>
-
-	<section class="economy">
-		<div class="container">
-			<div style="display: block">
-				<h1>Экономия после внедрения</h1>
-			</div>
-			<div class="calculate">
-				<p>Заявок в месяц:</p>
-				<button onclick="helpdeskTimeSavingsMinus()" class="main_btn">-</button>
-				<div class="man">
-					<h2 id="tasks_per_month_calculator">100</h2>
+				<div class="feature-card">
+					<h3 class="feature-title">Ответьте точно в срок</h3>
+					<p class="feature-desc">
+						Система подсвечивает срочное и просроченное, помогает держать обещанное время ответа.
+					</p>
 				</div>
-				<button onclick="helpdeskTimeSavingsPlus()" class="main_btn">+</button>
-			</div>
-			<div class="buy_card">
-				<h2 id="economy-hours">≈ 9 ч</h2>
-				<p>В месяц</p>
-			</div>
-			<div class="buy_card">
-				<h2 id="economy-money">≈ 7 067 ₽</h2>
-				<p>В месяц</p>
-			</div>
-			<div class="buy_card">
-				<h2 id="economy-fte">≈ 0.05 FTE</h2>
-				<p>В месяц</p>
-			</div>
-		</div>
-	</section>
 
-	<div class="economy-settings">
-		<button
-			id="economy-settings-toggle"
-			class="economy-settings__toggle"
-			type="button"
-			aria-expanded="false"
-			aria-controls="economy-settings-panel"
-		>
-			Параметры расчёта <span class="economy-settings__chev" aria-hidden="true">▾</span>
-		</button>
-
-		<div id="economy-settings-panel" class="economy-settings__panel" hidden>
-			<div class="economy-settings__grid">
-				<label class="economy-settings__field">
-					<span>“Чистое” время решения одной заявки (мин)</span>
-					<input id="eco_clean_min" type="number" min="1" max="240" step="1">
-				</label>
-				<label class="economy-settings__field">
-					<span>Стоимость часа сотрудника (₽/час)</span>
-					<input id="eco_cost_per_hour" type="number" min="100" max="20000" step="50">
-				</label>
-				<label class="economy-settings__field">
-					<span>Потери на бардак (мин на обращение)</span>
-					<input id="eco_chaos_min" type="number" min="0" max="240" step="0.5">
-				</label>
-				<label class="economy-settings__field">
-					<span>Доля дублей/повторных обращений (%)</span>
-					<input id="eco_dup_pct" type="number" min="0" max="100" step="0.1">
-				</label>
-				<label class="economy-settings__field">
-					<span>Доля потерянных/пропущенных (%)</span>
-					<input id="eco_lost_pct" type="number" min="0" max="100" step="0.1">
-				</label>
-				<label class="economy-settings__field">
-					<span>Доля ошибок/переоткрытий (%)</span>
-					<input id="eco_err_pct" type="number" min="0" max="100" step="0.1">
-				</label>
 			</div>
 
-			<div class="economy-settings__actions">
-				<button id="eco_reset" type="button" class="economy-settings__reset">Сбросить</button>
-			</div>
-		</div>
-	</div>
-
-	<section class="buy">
-		<div class="container">
-			<div class="image_buy">
-				<img style="align-items: center; width: 100%;" src="./img/lic.svg" alt="ul" id="C2">
-			</div>
-			<div class="calculate">
-				<button onclick="employeeCounterMinus()" class="main_btn">-</button>
-				<div class="man">
-					<h2 id="demo_1">1</h2>
+			<div class="features-row3">
+				<div class="feature-card">
+					<h3 class="feature-title">Работайте на любом устройстве</h3>
+					<p class="feature-desc">Будьте всегда в курсе всех обновлений по заявкам.</p>
 				</div>
-				<button onclick="employeeCounterPlus()" class="main_btn">+</button>
+
+				<div class="feature-card">
+					<h3 class="feature-title">Работайте в облаке</h3>
+					<p class="feature-desc">Доступ из любой точки. Без сложного внедрения.</p>
+				</div>
+
+				<div class="feature-card">
+					<h3 class="feature-title">Опирайтесь на заявки</h3>
+					<p class="feature-desc">Стандартизируйте процесс и исключите хаос переписок.</p>
+				</div>
 			</div>
-			<div class="buy_card">
-				<h2>Бесплатно</h2>
-				<p>Пробный период 1 месяц</p>
-				<button
-					class="main_btn"
-					onclick="window.open('https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo')"
-				>
-					Попробовать демо
-				</button>
+
+			<div class="feature-card features-wide">
+				<div>
+					<h3 class="feature-title">Легко масштабируйтесь</h3>
+					<p class="feature-desc">Через стандартизированный процесс заявок, базу знаний и шаблоны ответов.</p>
+				</div>
+				<div class="easy-scale-visual" aria-hidden="true">
+					<img class="easy-scale-bg" src="/img/easy_scale_bg.svg" alt=""/>
+					<img class="easy-scale-fig" src="/img/easy_scale_ul.svg" alt=""/>
+				</div>
 			</div>
-			<div class="buy_card">
-				<h2 id="demo">1 000 ₽ / 1 сотрудник</h2>
-				<p>В месяц</p>
-				<button
-					class="main_btn"
-					onclick="window.open('https://t.me/uldesk_help_bot')"
-				>
-					Купить
-				</button>
-			</div>
-			<div class="buy_card">
-				<h2 id="demo_2">10 000 ₽ / 1 сотрудник</h2>
-				<p>В год</p>
-				<button
-					class="main_btn"
-					onclick="window.open('https://t.me/uldesk_help_bot')"
-				>
-					Купить
-				</button>
-			</div>
-			<div>
-				<p>Покупаемая лицензия ограничивает лишь число учетных записей и не накладывает никаких ограничений
-					на количество клиентов, организаций или каналов связи.</p>
+
+			<div class="wide-cta">
+				<a class="btn primary"
+				   href="https://demo.uldesk.ru/login?username=demo@uldesk.ru&password=demo"
+				   target="_blank">
+					<span>Попробовать демо</span>
+				</a>
 			</div>
 		</div>
 	</section>
 
-	<section class="welcome">
+	<!-- TOOLS -->
+	<section id="tools" class="tools">
 		<div class="container">
-			<h1>Остались вопросы?</h1>
-			<p style="margin-top: 8px">Свяжитесь с нами и мы ответим на все ваши вопросы!</p>
-			<button
-				class="main_btn"
-				onclick="window.open('https://t.me/uldesk_help_bot')"
-			>
-				Связаться
-			</button>
+			<div class="section-title">Инструменты для работы</div>
+
+			<div class="tools-grid">
+
+				<div class="tools-left">
+					<div class="tool-item active" data-tool="automation">
+						<span class="tool-dot"></span>Гибкая автоматизация
+					</div>
+					<div class="tool-item" data-tool="priority">
+						<span class="tool-dot"></span>
+						Подсветка приоритетов и сроков
+					</div>
+					<div class="tool-item" data-tool="filters">
+						<span class="tool-dot"></span>Гибкие фильтры
+					</div>
+					<div class="tool-item" data-tool="chat">
+						<span class="tool-dot"></span>Чат операторов внутри каждой заявки
+					</div>
+					<div class="tool-item" data-tool="request">
+						<span class="tool-dot"></span>Заявка-ориентированная система
+					</div>
+				</div>
+
+				<div class="tools-right" id="toolCard" aria-live="polite">
+					<div class="tool-card-title" id="toolCardTitle">Автоматические ответы на часто задаваемые вопросы
+					</div>
+					<div class="tool-card-desc" id="toolCardDesc">
+						Настройте правила, шаблоны и макросы — система будет помогать оператору отвечать быстрее и
+						точнее.
+					</div>
+					<div class="tool-card-media" id="toolCardMedia">
+						<img class="tool-card-img" src="/img/automation.jpg" alt=""/>
+					</div>
+				</div>
+
+			</div>
 		</div>
 	</section>
+
+	<!-- CALCULATOR -->
+	<section id="pricing" class="calc">
+		<div class="container">
+			<div class="section-title">ПОСЧИТАЙТЕ ЭКОНОМИЮ</div>
+			<p class="calc-sub">За месяц работы</p>
+
+			<div class="calc-card">
+				<div class="calc-controls">
+					<div class="calc-control">
+						<div class="label">Сотрудников в команде</div>
+						<div class="stepper">
+							<button type="button" aria-label="Уменьшить"><span>-</span>
+							</button>
+							<input class="stepper-input" id="employees" value="1">
+							<button type="button" aria-label="Увеличить"><span>+</span>
+							</button>
+						</div>
+					</div>
+
+					<div class="calc-control">
+						<div class="label">Заявок в месяц</div>
+						<div class="stepper">
+							<button type="button" aria-label="Уменьшить">-</button>
+							<input class="stepper-input" id="tickets" value="100">
+							<button type="button" aria-label="Увеличить">+</button>
+						</div>
+					</div>
+
+					<div class="calc-control">
+						<div class="label">Оплата</div>
+						<div class="pay-seg" role="tablist" aria-label="Оплата">
+							<button type="button" id="payMonth" class="active" data-pay="month"><span>За месяц</span>
+							</button>
+							<button type="button" id="payYear" data-pay="year"><span>За год</span></button>
+						</div>
+					</div>
+
+					<div class="calc-control">
+						<div class="label">&nbsp;</div>
+						<button type="button" class="params-btn" id="paramsToggle" aria-expanded="false">
+							Показать параметры
+						</button>
+					</div>
+				</div>
+
+				<div class="calc-params" id="calcParams" aria-hidden="true">
+					<div class="calc-params-grid">
+
+						<div class="calc-control">
+							<div class="label">Стоимость часа сотрудника (₽/час)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="1">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+						<div class="calc-control">
+							<div class="label">“Чистое” время решения 1 заявки (мин)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="1">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+						<div class="calc-control">
+							<div class="label">Потери на бардак (мин на обращение)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="100">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+						<div class="calc-control">
+							<div class="label">Доля потерянных/пропущенных (раз/мес)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="100">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+						<div class="calc-control">
+							<div class="label">Доля повторных обращений (раз/мес)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="100">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+						<div class="calc-control">
+							<div class="label">Доля ошибок/перетокрытий (раз/мес)</div>
+							<div class="stepper stepper-small">
+								<button type="button" aria-label="Уменьшить">-</button>
+								<input class="stepper-input" value="100">
+								<button type="button" aria-label="Увеличить">+</button>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+
+				<div class="calc-results">
+					<div class="result">
+						<p class="name">Стоимость за месяц</p>
+						<p class="val" id="price">1000 ₽</p>
+					</div>
+					<div class="result">
+						<p class="name">Экономия денег</p>
+						<p class="val" id="economyMoney">≈ 7 067 ₽</p>
+					</div>
+					<div class="result">
+						<p class="name">Экономия времени</p>
+						<p class="val" id="economyTime">≈ 9 ч</p>
+					</div>
+					<div class="result">
+						<p class="name">Экономия человекочасов</p>
+						<p class="val" id="economyFte">≈ 0.05 FTE</p>
+						<span class="hint" aria-hidden="true">?</span>
+					</div>
+				</div>
+
+				<div class="price-policy">
+					<p>Покупаемая лицензия ограничивает лишь число учетных записей и не накладывает никаких ограничений
+						на количество клиентов, организаций или каналов связи.</p>
+				</div>
+
+				<div class="calc-cta">
+					<a class="calc-main-btn"
+					   id="calcBtn"
+					   href="https://t.me/uldesk_help_bot"
+					   target="_blank">
+						<span>Попробовать 1 месяц бесплатно</span>
+					</a>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+	<!-- CONTACT -->
+	<section class="contact">
+		<div class="container">
+			<div class="section-title">Остались вопросы?</div>
+			<div class="contact-card">
+				<a class="btn" href="https://t.me/uldesk_help_bot">Напишите нам</a>
+			</div>
+		</div>
+	</section>
+
 </main>
-<div class="fut">
+
+<footer>
 	<div class="container">
-		<img src="img/uldesk_logo.svg" alt="" style="width: 80px;">
-		<div style="display:flex; align-items:center; gap:16px; flex-wrap:nowrap; margin-top: 16px;">
-			<a
-				href="https://t.me/uldesk_help_bot"
-				target="_blank"
-				rel="noopener noreferrer"
-				style="display:flex; align-items:center; gap:8px; white-space:nowrap; text-decoration:none;"
-			>
-				<img src="img/telegram_ico.png" alt="tg" style="width:36px; height:36px; border-radius:999px;">
-				<span style="color:#fff;">@uldesk_help_bot</span>
-			</a>
-			<a
-				href="mailto:info@uldesk.ru"
-				target="_blank"
-				rel="noopener noreferrer"
-				style="display:flex; align-items:center; gap:8px; white-space:nowrap; text-decoration:none;"
-			>
-				<img src="img/email-ico.webp" alt="email" style="width:36px; height:36px;">
-				<span style="color:#fff;">info@uldesk.ru</span>
-			</a>
+		<div class="footer-grid">
+			<div>
+				<div class="footer-links">
+					<a href="#features">Возможности</a>
+					<a href="#tools">Инструменты</a>
+					<a href="#pricing">Цены</a>
+				</div>
+			</div>
+
+			<div>
+				<div class="footer-links">
+					<span>г. Москва</span>
+					<span>telegram: <a href="https://t.me/uldesk_help_bot" target="_blank">@uldesk_help_bot</a></span>
+					<span>почта: <a href="mailto://info@uldesk.ru" target="_blank">info@uldesk.ru</a></span>
+				</div>
+			</div>
+
+			<!--			<div>-->
+			<!--				<div class="footer-links">-->
+			<!--					<span>ИНН: 123456789012</span>-->
+			<!--					<span>ОГРНИП: 12362378237129847</span>-->
+			<!--				</div>-->
+			<!--			</div>-->
 		</div>
-		<h4 style="color: gray;">© 2026 ULDESK</h4>
+
+		<div class="footer-bottom">uldesk 2026 ©</div>
 	</div>
-</div>
+</footer>
 </body>
 </html>
