@@ -865,35 +865,35 @@ function initEconomySettingsUI() {
 	const toolsGrid = document.querySelector(".tools-grid");
 	const toolsLeft = document.querySelector(".tools-left");
 	const card = document.getElementById("toolCard");
-	const titleEl = document.getElementById("toolCardTitle");
+	// const titleEl = document.getElementById("toolCardTitle");
 	const descEl = document.getElementById("toolCardDesc");
 	const mediaEl = document.getElementById("toolCardMedia");
 
-	if (!items.length || !toolsGrid || !toolsLeft || !card || !titleEl || !descEl || !mediaEl) return;
+	if (!items.length || !toolsGrid || !toolsLeft || !card /*|| !titleEl*/ || !descEl || !mediaEl) return;
 
 	const content = {
 		automation: {
-			title: "Автоматические ответы на часто задаваемые вопросы",
+			// title: "Автоматические ответы на часто задаваемые вопросы",
 			desc: "Настройте шаблоны ответов, триггеры и макросы — система будет помогать оператору отвечать быстрее и точнее.",
 			img: "/img/automation.jpg"
 		},
 		priority: {
-			title: "Подсветка приоритетов и сроков",
+			// title: "Подсветка приоритетов и сроков",
 			desc: "Просроченные и срочные заявки видны сразу: проще контролировать SLA и не пропускать важное.",
 			img: "/img/sla.jpg"
 		},
 		filters: {
-			title: "Гибкие фильтры и сортировки",
+			// title: "Гибкие фильтры и сортировки",
 			desc: "Быстро находите нужные заявки по статусам, приоритетам, исполнителям и тегам.",
 			img: "/img/filters.jpg"
 		},
 		chat: {
-			title: "Чат операторов внутри каждой заявки",
+			// title: "Чат операторов внутри каждой заявки",
 			desc: "Обсуждайте решение внутри заявки, не теряя контекст и историю обращения.",
 			img: "/img/in_task_chat.jpg"
 		},
 		request: {
-			title: "Заявка-ориентированная система",
+			// title: "Заявка-ориентированная система",
 			desc: "Один клиент — много заявок. Процесс поддержки становится структурным и масштабируемым.",
 			img: "/img/chat-tasks.jpg"
 		}
@@ -973,7 +973,7 @@ function initEconomySettingsUI() {
 		switchTimer = window.setTimeout(() => {
 			if (pendingKey !== key) return;
 
-			titleEl.textContent = content[key].title;
+			// titleEl.textContent = content[key].title;
 			descEl.textContent = content[key].desc;
 			mediaEl.innerHTML = `<img src="${content[key].img}" alt="" loading="lazy">`;
 
@@ -987,7 +987,7 @@ function initEconomySettingsUI() {
 	}
 	// выставим начальное значение
 	const initial = content[activeKey] ? activeKey : items[0].dataset.tool;
-	titleEl.textContent = content[initial].title;
+	// titleEl.textContent = content[initial].title;
 	descEl.textContent = content[initial].desc;
 	placeCardUnderActiveRow();
 
