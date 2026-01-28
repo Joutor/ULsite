@@ -1084,10 +1084,6 @@ header.is-open .mobile-menu {
 	isolation: isolate;
 }
 
-.calc-cta .calc-main-btn {
-	--dots-w: 220px;
-}
-
 .btn.primary::after,
 .calc-cta .calc-main-btn::after,
 .stepper button::after,
@@ -1181,11 +1177,11 @@ header.is-open .mobile-menu {
 
 .result .hint-tooltip {
 	position: absolute;
+	width: 100%;
 	z-index: 20;
 	left: 50%;
 	top: -10px;
 	transform: translate(-65%, -110%);
-	width: min(760px, calc(100vw - 48px));
 	padding: 18px 22px;
 	background: #E6E0FF;
 	color: #373247;
@@ -1214,7 +1210,7 @@ header.is-open .mobile-menu {
 	opacity: 1;
 	visibility: visible;
 	pointer-events: auto;
-	transform: translate(-65%, -100%);
+	/*transform: translate(-65%, -100%);*/
 }
 
 .price-policy {
@@ -1237,7 +1233,13 @@ header.is-open .mobile-menu {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	--dots-w: 220px;
 }
+
+.calc-cta .calc-main-btn:hover {
+	background: #5E46D6 !important; /* как у .btn.primary:hover */
+}
+
 
 /* Params accordion */
 .calc-params {
@@ -1706,7 +1708,7 @@ footer {
 		margin-top: 14px;
 	}
 
-	.tools-right{
+	.tools-right {
 		position: relative !important;
 		height: auto !important;
 		min-height: 360px !important; /* чтобы блок точно был видим */
@@ -1715,7 +1717,7 @@ footer {
 		overflow: hidden !important;
 	}
 
-	.tools-right-inner{
+	.tools-right-inner {
 		position: relative !important;
 		inset: auto !important;
 		padding: 18px !important;
@@ -1724,9 +1726,27 @@ footer {
 		gap: 12px;
 	}
 
-	.tool-card-media{
+	.tool-card-media {
 		height: 220px !important;
 		flex: 0 0 auto !important;
+	}
+
+	.result-fte {
+		position: relative;
+	}
+
+	.result-fte .hint-tooltip {
+		left: auto;
+		right: 0;
+		top: 60px;
+		transform: translateY(-110%);
+		width: calc(100vw - 40px);
+		max-width: 420px;
+	}
+
+	.result-fte .hint-tooltip::after {
+		/*left: auto;*/
+		/*right: 22px;*/
 	}
 }
 
