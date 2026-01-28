@@ -34,8 +34,6 @@
 	<noscript>
 		<div><img src="https://mc.yandex.ru/watch/106306632" style="position:absolute; left:-9999px;" alt=""/></div>
 	</noscript>
-	<script src="../../../Downloads/script-new-fixed2.js"></script>
-	<script src="../../../Downloads/script-new(1).js"></script>
 	<!-- /Yandex.Metrika counter -->
 </head>
 
@@ -155,9 +153,9 @@
 	</section>
 
 	<!-- FEATURES -->
-	<section id="features" class="features">
+	<section class="features">
 		<div class="container">
-			<div class="section-title">Возможности</div>
+			<div id="features" class="section-title">Возможности</div>
 
 			<div class="features-grid">
 
@@ -166,11 +164,13 @@
 						<h3 class="feature-title">Назначьте ответственных</h3>
 						<p class="feature-desc">Система поможет контролировать сроки и статусы</p>
 					</div>
-					<object class="feature-img big-head-svg"
-							type="image/svg+xml"
-							data="/img/big_head.svg"
-							aria-label="big head"
-					></object>
+					<div class="feature-img-clip" aria-hidden="true">
+						<object class="feature-img big-head-svg"
+								type="image/svg+xml"
+								data="/img/big_head.svg"
+								aria-label="big head"
+						></object>
+					</div>
 				</div>
 
 				<div class="feature-card wide">
@@ -197,19 +197,21 @@
 
 				<div class="feature-card narrow">
 					<h3 class="feature-title">Работайте в облаке</h3>
-					<p class="feature-desc">Система подсвечивает срочное и просроченное, помогает держать обещанное
-						время ответа</p>
+					<p class="feature-desc">
+						Доступ из любой точки. Без сложного внедрения
+					</p>
 				</div>
 
 				<div class="feature-card narrow">
 					<h3 class="feature-title">Опирайтесь на заявки</h3>
-					<p class="feature-desc">Система подсвечивает срочное и просроченное, помогает держать обещанное
-						время ответа</p>
+					<p class="feature-desc">
+						Стандартизируйте процесс и исключите хаос переписок
+					</p>
 				</div>
 			</div>
 
 			<div class="feature-card features-wide">
-				<div>
+				<div class="feature-text">
 					<h3 class="feature-title">Легко масштабируйтесь</h3>
 					<p class="feature-desc">Через стандартизированный процесс заявок,<br>базу знаний и шаблоны ответов
 					</p>
@@ -231,9 +233,9 @@
 	</section>
 
 	<!-- TOOLS -->
-	<section id="tools" class="tools">
+	<section class="tools">
 		<div class="container">
-			<div class="section-title">Инструменты для работы</div>
+			<div id="tools" class="section-title">Инструменты для работы</div>
 
 			<div class="tools-grid">
 
@@ -257,13 +259,14 @@
 				</div>
 
 				<div class="tools-right" id="toolCard" aria-live="polite">
-					<!--<div class="tool-card-title" id="toolCardTitle">Автоматические ответы на часто задаваемые вопросы</div>-->
-					<div class="tool-card-desc" id="toolCardDesc">
-						Настройте правила, шаблоны и макросы — система будет помогать оператору отвечать быстрее и
-						точнее.
-					</div>
-					<div class="tool-card-media" id="toolCardMedia">
-						<img class="tool-card-img" src="/img/automation.jpg" alt=""/>
+					<div class="tools-right-inner">
+						<div class="tool-card-desc" id="toolCardDesc">
+							Настройте правила, шаблоны и макросы — система будет помогать оператору отвечать быстрее и
+							точнее.
+						</div>
+						<div class="tool-card-media" id="toolCardMedia">
+							<img class="tool-card-img" src="/img/automation.jpg" alt=""/>
+						</div>
 					</div>
 				</div>
 
@@ -272,9 +275,9 @@
 	</section>
 
 	<!-- CALCULATOR -->
-	<section id="pricing" class="calc">
+	<section class="calc">
 		<div class="container">
-			<div class="section-title">посчитайте экономию</div>
+			<div id="pricing" class="section-title">посчитайте экономию</div>
 			<p class="calc-sub">За месяц работы</p>
 
 			<div class="calc-card">
@@ -302,9 +305,12 @@
 					<div class="calc-control">
 						<div class="label">Оплата</div>
 						<div class="pay-seg" role="tablist" aria-label="Оплата">
-							<button type="button" id="payMonth" class="active" data-pay="month"><span>За месяц</span>
+							<button type="button" id="payMonth" class="active" data-pay="month">
+								<span>За месяц</span>
 							</button>
-							<button type="button" id="payYear" data-pay="year"><span>За год</span></button>
+							<button type="button" id="payYear" data-pay="year">
+								<span>За год</span>
+							</button>
 						</div>
 					</div>
 
@@ -390,10 +396,20 @@
 						<p class="name">Экономия времени</p>
 						<p class="val" id="economyTime">≈ 9 ч</p>
 					</div>
-					<div class="result">
+					<div class="result result-fte">
 						<p class="name">Экономия человекочасов</p>
 						<p class="val" id="economyFte">≈ 0.05 FTE</p>
-						<span class="hint" aria-hidden="true">?</span>
+						<button class="hint hint-btn"
+								type="button"
+								aria-label="Что такое FTE"
+								aria-expanded="false"
+						>
+							?
+						</button>
+						<div class="hint-tooltip" role="tooltip">
+							1 FTE = 1 сотрудник, работающий полный рабочий день,
+							обычно 40 часов в неделю или 2080 часов в год
+						</div>
 					</div>
 				</div>
 

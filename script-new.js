@@ -905,10 +905,35 @@ function initEconomySettingsUI() {
 	let switchTimer = 0;
 	let autoTimer = 0;
 	let pendingKey = activeKey;
-
 	// На мобилке карточка должна быть ПОД выбранной строкой.
 	// На десктопе — справа как сейчас.
 	const mqMobile = window.matchMedia("(max-width: 620px)");
+	const toolsSection = document.getElementById("tools") || toolsGrid;
+	let inView = false;
+
+	function stopAuto() {
+		inView = false;
+		if (autoTimer) {
+			clearTimeout(autoTimer);
+		}
+		autoTimer = 0;
+		if (switchTimer) {
+			clearTimeout(switchTimer);
+		}
+		switchTimer = 0;
+		// остановить анимацию таймера (точки) у всех
+		items.forEach(el => {
+			const dot = el.querySelector(".tool-dot");
+			if (dot) dot.classList.remove("timer-run");
+		});
+	}
+
+	function startAuto() {
+		if (inView) return;
+		inView = true;
+		restartDotTimer();
+		scheduleAuto(activeKey);
+	}
 
 	function placeCardUnderActiveRow() {
 		const activeEl = toolsLeft.querySelector(".tool-item.active") || items[0];
@@ -941,64 +966,81 @@ function initEconomySettingsUI() {
 	}
 
 	function scheduleAuto(currentKey) {
-		if (autoTimer) clearTimeout(autoTimer);
-
+		if (autoTimer) {
+			clearTimeout(autoTimer);
+		}
+		if (!inView) {
+			return;
+		}
 		autoTimer = setTimeout(() => {
+			if (!inView) {
+				return;
+			}
 			const idx = items.findIndex(i => i.dataset.tool === currentKey);
 			const next = items[(idx + 1) % items.length];
 			setActive(next.dataset.tool, true);
 		}, AUTO_MS);
 	}
 
+
 	function setActive(key, fromAuto = false) {
-		if (!content[key]) return;
-
+		if (!content[key]) {
+			return;
+		}
 		pendingKey = key;
-
 		// подсветка слева сразу
 		items.forEach(el => el.classList.toggle("active", el.dataset.tool === key));
 		placeCardUnderActiveRow();
-
-		// перезапуск таймера-полоски и автопереключения
-		restartDotTimer();
-		scheduleAuto(key);
-
+		if (inView) {
+			restartDotTimer();
+			scheduleAuto(key);
+		}
 		// если это уже активный — просто перезапустили таймер и выходим
-		if (key === activeKey) return;
-
-		if (switchTimer) clearTimeout(switchTimer);
-
+		if (key === activeKey) {
+			return;
+		}
+		if (switchTimer) {
+			clearTimeout(switchTimer);
+		}
 		// 1) запускаем плавное исчезновение
 		card.classList.add("is-changing");
 		switchTimer = window.setTimeout(() => {
-			if (pendingKey !== key) return;
-
+			if (pendingKey !== key) {
+				return;
+			}
 			// titleEl.textContent = content[key].title;
 			descEl.textContent = content[key].desc;
 			mediaEl.innerHTML = `<img src="${content[key].img}" alt="" loading="lazy">`;
-
 			requestAnimationFrame(() => {
 				card.classList.remove("is-changing");
 			});
-
 			activeKey = key;
 			switchTimer = 0;
 		}, 140);
 	}
-	// выставим начальное значение
 	const initial = content[activeKey] ? activeKey : items[0].dataset.tool;
-	// titleEl.textContent = content[initial].title;
 	descEl.textContent = content[initial].desc;
 	placeCardUnderActiveRow();
-
-	// Только клик (убрали hover)
 	items.forEach(el => {
 		el.addEventListener("click", () => setActive(el.dataset.tool));
 	});
-
-	// Запускаем таймер и автопереключение на старте
 	restartDotTimer();
-	scheduleAuto(activeKey);
+	if ("IntersectionObserver" in window) {
+		const io = new IntersectionObserver((entries) => {
+			const e = entries[0];
+			if (!e) {
+				return;
+			}
+			if (e.isIntersecting) {
+				startAuto();
+			} else {
+				stopAuto();
+			}
+		}, { threshold: 0.35 });
+		io.observe(toolsSection);
+	} else {
+		startAuto();
+	}
 
 	// если пользователь повернул экран / изменил ширину
 	if (mqMobile.addEventListener) {
@@ -1006,6 +1048,37 @@ function initEconomySettingsUI() {
 	} else if (mqMobile.addListener) {
 		mqMobile.addListener(placeCardUnderActiveRow);
 	}
+})();
+
+(function initFteHint() {
+	const result = document.querySelector(".result-fte");
+	if (!result) {
+		return;
+	}
+
+	const btn = result.querySelector(".hint-btn");
+	if (!btn) {
+		return;
+	}
+
+	function close() {
+		result.classList.remove("tooltip-open");
+		btn.setAttribute("aria-expanded", "false");
+	}
+
+	function toggle(e) {
+		e.stopPropagation();
+		const open = result.classList.toggle("tooltip-open");
+		btn.setAttribute("aria-expanded", open ? "true" : "false");
+	}
+
+	btn.addEventListener("click", toggle);
+	document.addEventListener("click", (e) => {
+		if (!result.contains(e.target)) close();
+	});
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape") close();
+	});
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
