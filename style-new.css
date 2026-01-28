@@ -1401,6 +1401,8 @@ footer {
 	width: 520px;
 	max-width: 100%;
 	aspect-ratio: 1 / 1;
+	top: 100px;
+	transform: scale(130%) translateX(60px);
 }
 
 .bighead img {
