@@ -1396,6 +1396,48 @@ footer {
 	background: rgba(90, 66, 255, 0.06);
 }
 
+.bighead {
+	position: relative;
+	width: 520px;
+	max-width: 100%;
+	aspect-ratio: 1 / 1;
+	top: 100px;
+	transform: scale(130%) translateX(60px);
+}
+
+.bighead img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	display: block;
+	pointer-events: none;
+	user-select: none;
+}
+
+.bighead-eyes,
+.bighead-stache {
+	will-change: transform;
+	transform: translate(0, 0);
+}
+
+.bighead-base {
+	z-index: 1;
+}
+
+.bighead-eyes {
+	z-index: 2;
+}
+
+.bighead-hat {
+	z-index: 3;
+}
+
+.bighead-stache {
+	z-index: 4;
+}
+
 /* ---------- Responsive ---------- */
 /* <= 980px */
 @media (max-width: 980px) {

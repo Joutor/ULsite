@@ -1081,6 +1081,105 @@ function initEconomySettingsUI() {
 	});
 })();
 
+(() => {
+	// Новый вариант: слои (img/object) с классами .bighead-eyes и .bighead-stache/.bighead-mustache
+	const root =
+		document.querySelector('.bighead') ||
+		document.querySelector('.feature-with-image .bighead') ||
+		null;
+
+	const eyesEl = root ? root.querySelector('.bighead-eyes') : null;
+	const mustEl = root ? (root.querySelector('.bighead-stache') || root.querySelector('.bighead-mustache')) : null;
+
+	const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+	const lerp = (a, b, t) => a + (b - a) * t;
+
+	const AMP = { eyesX: 10, eyesY: 6, mustX: 6, mustY: 3 };
+
+	// Если слои есть — двигаем целиком слой (работает с img/svg без доступа внутрь)
+	if (root && eyesEl && mustEl) {
+		const state = { tx: 0, ty: 0, x: 0, y: 0 };
+		let raf = 0;
+
+		function calcNorm(clientX, clientY) {
+			const r = root.getBoundingClientRect();
+			const cx = r.left + r.width / 2;
+			const cy = r.top + r.height / 2;
+			const nx = clamp((clientX - cx) / (r.width / 2), -1, 1);
+			const ny = clamp((clientY - cy) / (r.height / 2), -1, 1);
+			state.x = nx;
+			state.y = ny;
+		}
+
+		function tick() {
+			state.tx = lerp(state.tx, state.x, 0.12);
+			state.ty = lerp(state.ty, state.y, 0.12);
+
+			// двигаем только глаза и усы (шляпа не трогается, она отдельный слой с z-index выше)
+			eyesEl.style.transform = `translate(${(state.tx * AMP.eyesX).toFixed(2)}px, ${(state.ty * AMP.eyesY).toFixed(2)}px)`;
+			mustEl.style.transform = `translate(${(state.tx * AMP.mustX).toFixed(2)}px, ${(state.ty * AMP.mustY).toFixed(2)}px)`;
+
+			raf = requestAnimationFrame(tick);
+		}
+
+		function onMouseMove(e) { calcNorm(e.clientX, e.clientY); }
+		function onTouchMove(e) {
+			const t = e.touches && e.touches[0];
+			if (t) calcNorm(t.clientX, t.clientY);
+		}
+		function reset() { state.x = 0; state.y = 0; }
+
+		window.addEventListener('mousemove', onMouseMove, { passive: true });
+		window.addEventListener('touchmove', onTouchMove, { passive: true });
+		window.addEventListener('blur', reset, { passive: true });
+		root.addEventListener('mouseleave', reset, { passive: true });
+
+		raf = requestAnimationFrame(tick);
+		return;
+	}
+
+	// Старый вариант (если всё ещё используешь один SVG через <object class="big-head-svg">)
+	const obj = document.querySelector('.big-head-svg');
+	if (!obj) return;
+
+	let doc, eyes, mustache;
+	const state = { tx: 0, ty: 0, x: 0, y: 0 };
+
+	function apply() {
+		state.tx = lerp(state.tx, state.x, 0.12);
+		state.ty = lerp(state.ty, state.y, 0.12);
+
+		if (eyes) eyes.setAttribute('transform', `translate(${state.tx * AMP.eyesX} ${state.ty * AMP.eyesY})`);
+		if (mustache) mustache.setAttribute('transform', `translate(${state.tx * AMP.mustX} ${state.ty * AMP.mustY})`);
+
+		requestAnimationFrame(apply);
+	}
+
+	function onMove(e) {
+		const nx = (e.clientX / window.innerWidth - 0.5) * 2;
+		const ny = (e.clientY / window.innerHeight - 0.5) * 2;
+		state.x = clamp(nx, -1, 1);
+		state.y = clamp(ny, -1, 1);
+	}
+
+	function onLeaveWindow() { state.x = 0; state.y = 0; }
+
+	obj.addEventListener('load', () => {
+		doc = obj.contentDocument;
+		if (!doc) return;
+
+		eyes = doc.getElementById('bighead-eyes');
+		mustache = doc.getElementById('bighead-mustache');
+		if (!eyes && !mustache) return;
+
+		window.addEventListener('mousemove', onMove, { passive: true });
+		window.addEventListener('blur', onLeaveWindow, { passive: true });
+
+		requestAnimationFrame(apply);
+	});
+})();
+
+
 document.addEventListener("DOMContentLoaded", () => {
 	// Защита от двойной инициализации (на мобилках/при дубле скриптов кнопки могли срабатывать 2 раза)
 	if (window.__uldesk_landing_dom_inited) {
